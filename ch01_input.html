@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.01 超音波の基礎物理 | POCUS—LOOP</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1f2e47;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #34d399;
+    --warn: #fb923c;
+    --danger: #f87171;
+    --text: #e2e8f0;
+    --text-muted: #7c8fa8;
+    --text-dim: #4a5568;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    line-height: 1.8;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,15,26,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    color: #fff;
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  .back-link {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0e1829 0%, #111c35 50%, #0b1621 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 52px 24px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(56,189,248,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 820px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(56,189,248,0.12);
+    border: 1px solid rgba(56,189,248,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+    font-family: 'Syne', sans-serif;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(26px, 5vw, 38px);
+    line-height: 1.2;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: var(--text-muted);
+    font-size: 14px;
+    max-width: 540px;
+  }
+  .hero-meta {
+    margin-top: 20px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .hero-meta span {
+    font-size: 12px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  /* ── Main ── */
+  main { max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ── Section header ── */
+  .section-group-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 48px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Accordion Item ── */
+  .item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .item:hover { border-color: rgba(56,189,248,0.25); }
+  .item.open { border-color: rgba(56,189,248,0.35); }
+
+  .item-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    background: var(--surface);
+    user-select: none;
+    transition: background .2s;
+  }
+  .item-header:hover { background: var(--surface2); }
+  .item.open .item-header { background: var(--surface2); }
+
+  .item-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(56,189,248,0.1);
+    border: 1px solid rgba(56,189,248,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  .item-title-wrap { flex: 1; }
+  .item-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    line-height: 1.3;
+  }
+  .item-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .item-arrow {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform .25s, background .2s;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+  .item.open .item-arrow {
+    transform: rotate(180deg);
+    background: rgba(56,189,248,0.1);
+    border-color: rgba(56,189,248,0.3);
+    color: var(--accent);
+  }
+
+  .item-body {
+    display: none;
+    padding: 0 20px 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .item.open .item-body { display: block; }
+
+  /* ── Blocks ── */
+  .block {
+    margin-top: 20px;
+  }
+  .block-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .block-label .icon { font-size: 15px; }
+  .block-label .label-text { color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }
+
+  .block p, .block li {
+    font-size: 14.5px;
+    color: var(--text);
+    line-height: 1.85;
+  }
+  .block ul { padding-left: 18px; }
+  .block li { margin-bottom: 4px; }
+
+  /* block color variants */
+  .block-intro .block-label .icon { color: #a78bfa; }
+  .block-def .block-label .icon { color: var(--accent); }
+  .block-mech .block-label .icon { color: var(--accent3); }
+  .block-clin .block-label .icon { color: #fbbf24; }
+  .block-diff .block-label .icon { color: var(--accent2); }
+  .block-warn .block-label .icon { color: var(--danger); }
+
+  .callout {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    line-height: 1.75;
+    margin-top: 8px;
+  }
+  .callout-intro { background: rgba(167,139,250,0.08); border-left: 3px solid #a78bfa; }
+  .callout-def { background: rgba(56,189,248,0.07); border-left: 3px solid var(--accent); }
+  .callout-mech { background: rgba(52,211,153,0.07); border-left: 3px solid var(--accent3); }
+  .callout-clin { background: rgba(251,191,36,0.07); border-left: 3px solid #fbbf24; }
+  .callout-diff { background: rgba(129,140,248,0.07); border-left: 3px solid var(--accent2); }
+  .callout-warn { background: rgba(248,113,113,0.08); border-left: 3px solid var(--danger); }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag-key { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-warn { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .tag-clin { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
+  strong { color: #fff; font-weight: 600; }
+  em { color: var(--accent2); font-style: normal; font-weight: 500; }
+
+  /* ── Claude Note ── */
+  .claude-note {
+    margin-top: 56px;
+    background: var(--surface2);
+    border: 1px solid rgba(129,140,248,0.3);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .claude-note-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent2);
+    margin-bottom: 14px;
+  }
+  .claude-note p, .claude-note li { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+  .claude-note ul { padding-left: 18px; }
+  .claude-note li { margin-bottom: 6px; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .hero { padding: 36px 16px 28px; }
+    main { padding: 28px 16px 60px; }
+    .item-header { padding: 14px 16px; }
+    .item-body { padding: 0 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="logo">POCUS<span>—</span>LOOP</a>
+  <a href="../index.html" class="back-link">← 目次に戻る</a>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Chapter 01</div>
+    <h1>超音波の基礎物理</h1>
+    <p>POCUSを理解するための物理的基盤。波の振る舞い、エネルギーの伝搬、そして画像形成の仕組みを体系的に学びます。</p>
+    <div class="hero-meta">
+      <span>📚 D4.1 〜 D4.11</span>
+      <span>🎯 11項目</span>
+      <span>⏱ 推定読了 25分</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<div class="section-group-title">波の基本パラメータ</div>
+
+<!-- D4.1 周波数 -->
+<div class="item" id="item-d41">
+  <div class="item-header" onclick="toggle('item-d41')">
+    <div class="item-num">D4.1</div>
+    <div class="item-title-wrap">
+      <div class="item-title">周波数</div>
+      <div class="item-subtitle">Frequency</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        ラジオ局の「周波数」をイメージしてください。周波数が高い（AM/FMの数字が大きい）ほど、信号が細かく振動し、情報を精細に伝えられますが、壁などの障害物で遮断されやすくなります。超音波も同じで、<strong>高周波数＝精細だが遠くに届かない</strong>、<strong>低周波数＝粗いが遠くまで届く</strong>という関係があります。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        波の振動（周期）が<strong>1秒間に何回繰り返されるか</strong>を示す数値。単位は <span class="tag tag-key">Hz（ヘルツ）</span>。人間の可聴域は約20Hz〜20,000Hz（20kHz）であり、それを超える音波が超音波。診断用超音波は <span class="tag tag-key">2〜20 MHz</span> の範囲が用いられる。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>音速(c) = 周波数(f) × 波長(λ) ── 媒質中の音速は一定なので、fが上がるとλは短くなる（反比例）</li>
+          <li>プローブの振動子は厚み(L)で決まる共振周波数 <strong>fz = c / 2L</strong> を持つ</li>
+          <li>パルス波は単一周波数でなく周波数スペクトルを持ち、頂点を<strong>中心周波数</strong>、半値幅を<strong>帯域幅</strong>と呼ぶ</li>
+          <li>高周波数ほどビームは絞られ（指向性↑）、減衰も大きくなる</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li><strong>高周波（7.5〜15MHz）</strong>：頸動脈・甲状腺・表在リンパ節など浅部。分解能◎ 深達性✕</li>
+          <li><strong>低周波（2〜5MHz）</strong>：腹部・心臓など深部。分解能△ 深達性◎</li>
+          <li>ドプラシフト（血流速度の計測）は送信周波数に依存 → 低周波プローブはシフト量が小さく、エイリアシングが起きにくい</li>
+          <li>高周波・高出力は熱発生（TI上昇）に関与 → ALARA原則を守る</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <ul>
+          <li><strong>周波数 vs PRF</strong>：前者は超音波の振動数、後者は1秒間の送受信回数（パルス繰り返し）。別概念。</li>
+          <li><strong>中心周波数 vs 帯域幅</strong>：中心周波数はプローブの「得意な音程」、帯域幅は許容する音程の広がり。広い帯域幅は距離分解能向上に寄与。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        「周波数を上げれば画像がきれいになる」は正しいが、深部が見えなくなるトレードオフがある。腹部エコーでリニアプローブを使うと肝深部が減衰で真っ黒になるのはこのため。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- D4.2 波長 -->
+<div class="item" id="item-d42">
+  <div class="item-header" onclick="toggle('item-d42')">
+    <div class="item-num">D4.2</div>
+    <div class="item-title-wrap">
+      <div class="item-title">波長</div>
+      <div class="item-subtitle">Wavelength</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        水面の波紋で「山と山の間の距離」を想像してください。それが波長です。細かい波紋（高周波）は「山と山」が近いので波長が短く、ゆったりした波（低周波）は波長が長くなります。<strong>波長が短いほど、細かいものを見分ける力（分解能）が高い</strong>ため、超音波では周波数を上げて波長を短くすることが鮮明な画像の鍵になります。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        波の「密」から次の「密」（または「山」から次の「山」）までの距離。記号 <span class="tag tag-key">λ（ラムダ）</span>、単位 m（メートル）。<br>
+        <strong>c = f × λ</strong> より、λ = c / f。5MHz水中では約0.3mm。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>媒質中の音速は一定 → 周波数と波長は<strong>反比例</strong>（f↑ = λ↓）</li>
+          <li>距離分解能の理論的限界は約λ/2（波長の半分以下の物体は分離できない）</li>
+          <li>グレーティングローブ：振動子間隔(d)が波長の整数倍の方向に不要なビームが出現。高周波（短波長）ではエレメントピッチを小さくする必要がある</li>
+          <li>振動子口径が波長に対して十分大きくない場合、球面状に拡散する</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        波長は直接操作できないが、<strong>周波数を選択することで間接的に制御</strong>する。距離分解能を上げたい場合 → 高周波プローブ（短波長）を選択。
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <strong>波長 vs 周期(T)</strong>：波長は「空間的な長さ」、周期は「時間的な長さ（1振動にかかる秒数）」。T = 1/f。
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        生体内（軟部組織）の音速は約1,540 m/s（装置の計算に使われる固定値）。実際には組織ごとにわずかに異なるため、この差がアーチファクトの原因になることがある。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- D4.3 振幅 -->
+<div class="item" id="item-d43">
+  <div class="item-header" onclick="toggle('item-d43')">
+    <div class="item-num">D4.3</div>
+    <div class="item-title-wrap">
+      <div class="item-title">振幅</div>
+      <div class="item-subtitle">Amplitude</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        スピーカーのボリューム（音量）をイメージしてください。ボリュームが大きい＝振幅が大きい＝音が強い、です。超音波では振幅が大きいほど強い音波を送り込んでいることになり、画面上の<strong>エコーの明るさ（輝度）は振幅の大きさで決まります</strong>。ただし体の奥へ進むほど振幅は弱まり（減衰）、深部のエコーは暗くなります。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        波の振れ幅。音波の強弱の幅であり、超音波の「強さ（Power）」を表すパラメータ。Aモードでは縦軸、Bモードでは輝度（明るさ）として表示される。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>生体内での振幅は伝搬距離に対して<strong>対数的（指数関数的）に減衰</strong></li>
+          <li>例：5MHzで8cm伝搬すると振幅は約1/10になる</li>
+          <li>これを補正するのが <span class="tag tag-key">STC / TGC</span>（深さに応じて受信ゲインを増幅する機能）</li>
+          <li>振幅（音圧）は機械的指数 <span class="tag tag-key">MI（Mechanical Index）</span> に関与</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li><strong>Aモード</strong>：振幅を縦軸グラフで表示（眼科など）</li>
+          <li><strong>Bモード</strong>：振幅→輝度変換で断面像を形成（現在の主流）</li>
+          <li>TGCを適切に調整することで深部の均一な画質を確保</li>
+          <li>高出力（大振幅）はキャビテーションリスク → ALARA原則</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <strong>振幅 vs 周波数</strong>：振幅は「音の強さ（量）」、周波数は「音の高さ（質）」。どちらも独立して設定できるパラメータ。
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        ゲイン（増幅）を上げすぎると、弱いエコー同士の差が潰れて分解能が実質的に低下する。「明るければよい」ではなく、適切な出力設定が正確な診断の前提。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-group-title">伝搬現象</div>
+
+<!-- D4.4 減衰 -->
+<div class="item" id="item-d44">
+  <div class="item-header" onclick="toggle('item-d44')">
+    <div class="item-num">D4.4</div>
+    <div class="item-title-wrap">
+      <div class="item-title">減衰</div>
+      <div class="item-subtitle">Attenuation</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        遠くにいる人の声が小さくなるように、超音波も体の奥へ進むほど弱まります。さらに周波数が高い（音程が高い）ほど、この弱まり方が激しくなります。<strong>深部が画像上で暗くなる主な原因</strong>はこの減衰で、装置のTGCでそれを補正します。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        超音波が媒質を伝搬する際に、振幅（強度）が距離とともに減少する現象。構成要素は<strong>①吸収 ②拡散 ③散乱</strong>の3つ。単位：dB/cm（または dB/cm/MHz）。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>振幅は伝搬距離に対して<strong>対数的に減衰</strong>（dBスケールで線形）</li>
+          <li><strong>周波数依存減衰</strong>：高周波ほど減衰係数が大きい（軟部組織では約0.5 dB/cm/MHz）</li>
+          <li>5MHz・8cmで振幅が1/10になる例がある</li>
+          <li>補正手段：STC（Sensitivity Time Control）/ TGC（Time Gain Compensation）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li><strong>音響陰影</strong>：骨・結石など強反射体の後方にエコーが届かず暗くなる → 結石や石灰化の診断サイン</li>
+          <li><strong>後方エコー減衰</strong>：腫瘤内で減衰が強い場合（例：線維腺腫）に後方が暗くなる</li>
+          <li><strong>脂肪肝</strong>：散乱・吸収増大 → 深部急激に減衰 → 「ブライトリバー」＋深部暗化</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <ul>
+          <li><strong>音響陰影 vs 後方エコー減衰</strong>：前者は骨・結石など強反射で後方が<em>完全欠損</em>、後者は腫瘤などで<em>相対的に暗い</em></li>
+          <li><strong>後方エコー増強</strong>：嚢胞など液体（減衰小）の後方では逆に明るくなる</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        TGCを過剰補正すると深部が明るくなりすぎ、病変を見落とす可能性がある。「均一な明るさ」を意識して調整する。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- D4.5 吸収 -->
+<div class="item" id="item-d45">
+  <div class="item-header" onclick="toggle('item-d45')">
+    <div class="item-num">D4.5</div>
+    <div class="item-title-wrap">
+      <div class="item-title">吸収</div>
+      <div class="item-subtitle">Absorption</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        電子レンジが食品を加熱する仕組みと似ています。超音波の振動エネルギーが組織に吸収され、摩擦熱として変換されます。これが<strong>減衰の主な原因</strong>であり、安全性（TI：熱指数）の観点から重要です。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        超音波の音響エネルギーが生体組織を通過する際に<strong>熱エネルギーへ変換されて消失</strong>する現象。減衰の構成要素（吸収・拡散・散乱）のうち最も主要な要因。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>振動により組織分子間で摩擦が生じ、熱に変換される</li>
+          <li>高周波数ほど振動回数が多い → 吸収大 → 発熱大</li>
+          <li>安全指標：<span class="tag tag-key">TI（Thermal Index）</span> = 組織の温度上昇を推定する指数</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        胎児検査など感受性の高い組織では TI を低く保つことが推奨される。TI &lt; 0.7 を目安に管理し、1を超えた場合は照射時間を最小化する。
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <strong>吸収 vs 散乱 vs 拡散</strong>：3つ合わせて「減衰」。吸収はエネルギーが熱に変わる、散乱は無数の方向に飛ぶ、拡散はビームが広がることによる強度低下。
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        ALARA原則（As Low As Reasonably Achievable）：診断目的を達成できる最小の出力・最短の時間にとどめる。特に妊娠初期・眼球・新生児では厳守。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- D4.6 屈折 -->
+<div class="item" id="item-d46">
+  <div class="item-header" onclick="toggle('item-d46')">
+    <div class="item-num">D4.6</div>
+    <div class="item-title-wrap">
+      <div class="item-title">屈折</div>
+      <div class="item-subtitle">Refraction</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        水が入ったコップにストローを入れると、水面で「折れ曲がって」見えます。光が空気から水に入るときに屈折するのと同様に、超音波も音速の異なる組織の境界で斜めに当たると進行方向が曲がります。この現象が<strong>一つの血管が二重に見える（虚像）</strong>などのアーチファクトを引き起こすことがあります。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        音速が異なる媒質の境界に超音波が<strong>斜めに入射</strong>した際、進行方向が曲げられる現象。境界に垂直（直角）に入射した場合は屈折しない。スネル（Snell）の法則に従う。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li><strong>Snellの法則</strong>：sin θ₁ / c₁ = sin θ₂ / c₂（入射角と屈折角は音速の比で決まる）</li>
+          <li>波面の片側が先に速い媒質に入ることで進路が曲がる</li>
+          <li><strong>応用</strong>：音響レンズはこの原理を利用してビームをスライス方向に収束させる</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li>腹直筋で屈折 → 上腸間膜動脈などが<strong>二重に見える（ダブルイメージ）</strong></li>
+          <li>対処法：プローブの位置・角度を変えて多方向から確認する</li>
+          <li>音響レンズの設計に屈折を積極的に活用（厚み方向の分解能向上）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <strong>屈折 vs ミラーイメージ</strong>：屈折は音波が曲がることで虚像が生じる、ミラーイメージは強い反射面（横隔膜など）に実像が映り込む現象。発生メカニズムが異なる。
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        スライス幅アーチファクトの原因は<strong>屈折ではなく</strong>、ビームの厚み（スライス厚）の問題。混同しやすいため注意。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- D4.7 散乱 -->
+<div class="item" id="item-d47">
+  <div class="item-header" onclick="toggle('item-d47')">
+    <div class="item-num">D4.7</div>
+    <div class="item-title-wrap">
+      <div class="item-title">散乱</div>
+      <div class="item-subtitle">Scattering</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        霧の中でヘッドライトを当てると、光が霧の水滴に当たって四方八方に散らばります。超音波でも、波長より小さな微細構造（細胞など）に当たると、無数の反射波が生まれてあちこちに飛びます。これが<strong>エコー画像の「粒々感（スペックル）」</strong>の正体です。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        <strong>波長より小さい不規則な構造</strong>（組織の不均一性など）に超音波が当たることで、あらゆる方向に無数の反射波が生じる現象。これらの散乱波が干渉し合い、画像上に<span class="tag tag-key">スペックル（speckle）</span>を形成する。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>散乱体（赤血球・組織実質の微細構造）からの反射波が互いに干渉 → スペックルパターン形成</li>
+          <li>スペックルパターンは<strong>周波数に依存</strong>：高周波ほど細かいパターン</li>
+          <li>散乱は減衰（吸収+拡散+<em>散乱</em>）の一因でもある</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li><strong>脂肪肝</strong>：脂肪滴による散乱↑ → 肝実質が高輝度（ブライトリバー）</li>
+          <li><strong>線維化</strong>：線維組織の増加 → 散乱パターン変化 → 診断に応用</li>
+          <li>ドプラ法での血流計測：赤血球からの散乱波をドプラシフトとして検出</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <strong>散乱 vs 鏡面反射</strong>：散乱は小さな不規則構造で「全方向に」飛ぶ、鏡面反射は平滑な大きな境界面で「特定方向に」返る。臓器の輪郭（鏡面反射）とその内部（散乱）を使い分けている。
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        スペックルは組織の実際の構造を反映しているわけではなく、散乱波の干渉パターン。「粒々」が見えても、それが個々の細胞に対応しているわけではない。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-group-title">境界での現象と画像形成</div>
+
+<!-- D4.8 反射 -->
+<div class="item" id="item-d48">
+  <div class="item-header" onclick="toggle('item-d48')">
+    <div class="item-num">D4.8</div>
+    <div class="item-title-wrap">
+      <div class="item-title">反射</div>
+      <div class="item-subtitle">Reflection</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        山びこ（エコー）と全く同じ原理です。声を出すと山に当たって返ってくるように、超音波を体に送ると組織の境界で跳ね返ってきます。この<strong>「戻ってきた音（エコー）の強さと時間」を使って画像が作られます</strong>。空気や骨は非常に強く反射するため、その先には超音波が届かず、画面が真っ暗になります。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        <strong>音響インピーダンス（Z）が異なる媒質の境界</strong>で超音波が跳ね返る現象。<br>
+        Z（音響インピーダンス）= ρ（密度）× c（音速）<br>
+        反射率(R) = (Z₂ - Z₁) / (Z₂ + Z₁)<br>
+        差が大きいほど反射が強く、透過が少なくなる。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>肝臓と筋肉の境界：Z差が小さい → 弱い反射（R ≒ 0.01 → 1%反射）</li>
+          <li>生体と空気の境界：Z差が極大 → ほぼ100%反射（R ≒ -1.00）</li>
+          <li>ビームが境界面に<strong>垂直（90°）</strong>に当たるほど反射が強い → より白く映る</li>
+          <li>鏡面反射（平滑面）vs 散乱（粗面・微細構造）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li>Bモード画像：エコー強度を輝度に変換して断面像を形成（白＝強反射、黒＝無反射）</li>
+          <li>ゼリー（ジェル）の役割：プローブ-皮膚間の空気（全反射）を排除し透過性向上</li>
+          <li>アーチファクト：<strong>多重反射</strong>（リバーブレーション）・<strong>ミラーイメージ</strong>・<strong>音響陰影</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <ul>
+          <li><strong>反射 vs 透過</strong>：一方が増えれば他方が減る（保存則）。両者の和 = 100%。</li>
+          <li><strong>音響インピーダンス vs 音速</strong>：Zは密度も含めた複合指標。音速が同じでも密度が違えばZが異なる。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        腸管ガスや肺（空気）は超音波の大敵。エコーゼリーを十分に塗り、プローブを体壁に密着させることで空気層をなくすことが重要。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- D4.9 透過 -->
+<div class="item" id="item-d49">
+  <div class="item-header" onclick="toggle('item-d49')">
+    <div class="item-num">D4.9</div>
+    <div class="item-title-wrap">
+      <div class="item-title">透過</div>
+      <div class="item-subtitle">Transmission</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        サングラスのレンズは光の一部を通し（透過）、一部は吸収・反射します。超音波も同様に、組織の境界で「反射する量」と「通り抜ける量（透過）」が決まります。<strong>透過しやすいほど深部まで届き</strong>、液体（嚢胞など）は透過性が高いため、後方のエコーが逆に明るくなります（後方エコー増強）。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        超音波が組織境界を<strong>通り抜けてより深部へ進む</strong>こと。反射率と透過率の和は常に1（100%）。音響インピーダンスの差が小さいほど透過率が高い。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>Z差が小→透過多（軟部組織間：99%が透過）</li>
+          <li>Z差が大→透過少（骨・ガス：ほぼ透過しない）</li>
+          <li>周波数が高いほど透過性は低下（深達性↓）</li>
+          <li>整合層（matching layer）：振動子-生体間のZ差を埋め、効率的に超音波を透過させる技術</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li><span class="tag tag-clin">後方エコー増強</span>：嚢胞・膀胱など液体貯留部位の後方が明るくなる → 液体の存在を示す重要サイン</li>
+          <li><span class="tag tag-clin">音響陰影</span>：骨・結石の後方でエコーが欠損 → 減衰・透過不良のサイン</li>
+          <li>プローブ選択の根拠：深部観察では低周波（透過↑）、浅部では高周波（分解能↑）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <strong>後方エコー増強 vs 後方エコー減衰</strong>：前者は透過性↑（液体）で後方が明るい、後者は透過性↓（硬い腫瘤）で後方が暗い。この違いで内部性状を推定できる。
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        「後方エコー増強があれば嚢胞」と断言しない。まれに粘液腫瘍など均質な内部を持つ固形腫瘤でも生じることがある。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-group-title">画像の質と血流計測</div>
+
+<!-- D4.10 解像度（分解能） -->
+<div class="item" id="item-d410">
+  <div class="item-header" onclick="toggle('item-d410')">
+    <div class="item-num">D4.10</div>
+    <div class="item-title-wrap">
+      <div class="item-title">解像度（分解能）</div>
+      <div class="item-subtitle">Resolution</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        カメラの「解像度」と同じ概念です。解像度が高いほど細かいものを見分けられます。超音波では<strong>「縦方向（ビームの進む方向）」「横方向（ビームに直交する方向）」「厚み方向」</strong>の3種類の分解能があり、それぞれの改善方法が異なります。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        <strong>2点を別個の点として識別できる最小距離</strong>。小さいほど分解能が高い（良い画質）。<br>
+        ①<span class="tag tag-key">距離分解能</span>（軸方向）：パルス幅で決まる<br>
+        ②<span class="tag tag-key">方位分解能</span>（側方向）：ビーム幅で決まる<br>
+        ③<span class="tag tag-key">スライス方向分解能</span>（厚み方向）：ビームの厚みで決まる<br>
+        ④<span class="tag tag-key">コントラスト分解能</span>：輝度差の識別能
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li><strong>距離分解能</strong>：パルス幅が短いほど向上。高周波数 → 短パルス → 良距離分解能</li>
+          <li><strong>方位分解能</strong>：ビームが細いほど向上。フォーカス、電子リニアアレイで改善</li>
+          <li><strong>スライス分解能</strong>：音響レンズによるビームの厚み方向の絞り込み</li>
+          <li>多段フォーカス・ダイナミックフォーカスで広範囲の分解能を向上</li>
+          <li>オブリークスキャン：斜め入射で体表平行面（血管壁など）の分解能を改善</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li>フォーカスを目標構造物の深さに合わせることが基本。FAST/POCUSでは関心領域に合わせる</li>
+          <li>高周波プローブ（線形）vs 低周波（コンベックス）の選択は分解能-透過性のトレードオフ</li>
+          <li>ゲイン過多 → 輝度が均一化 → コントラスト分解能低下</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <strong>距離分解能 vs 方位分解能</strong>：距離は「音波の短さ」（周波数依存）、方位は「音波の細さ」（ビーム幅・フォーカス依存）。前者は周波数を上げることで、後者はフォーカス調整で主に改善する。
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        スライス幅アーチファクト：ビームの厚み内に存在する反射体が同一断面に表示されてしまう。嚢胞内に点状エコーが出現して内部充実性と誤認することがある（偽エコー）。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- D4.11 エイリアシング -->
+<div class="item" id="item-d411">
+  <div class="item-header" onclick="toggle('item-d411')">
+    <div class="item-num">D4.11</div>
+    <div class="item-title-wrap">
+      <div class="item-title">エイリアシング</div>
+      <div class="item-subtitle">Aliasing</div>
+    </div>
+    <div class="item-arrow">▾</div>
+  </div>
+  <div class="item-body">
+
+    <div class="block block-intro">
+      <div class="block-label"><span class="icon">🔰</span><span class="label-text">初学者向け説明</span></div>
+      <div class="callout callout-intro">
+        映画で扇風機の羽根が「逆回転」に見えることがあります。これはカメラの撮影速度（フレームレート）が羽根の速度に追いつけないために起こる錯覚です。超音波のエイリアシングも全く同じ仕組みで、<strong>血流が速すぎると計測装置が追いつけず、「実際とは逆向き」の血流として表示</strong>されてしまいます。
+      </div>
+    </div>
+
+    <div class="block block-def">
+      <div class="block-label"><span class="icon">📖</span><span class="label-text">定義</span></div>
+      <div class="callout callout-def">
+        パルスドプラ法において、血流速度が<strong>ナイキスト限界（PRF/2）</strong>を超えた場合に発生する「折り返し現象」。実際の流れとは逆向き・逆色で表示されるアーチファクト。
+      </div>
+    </div>
+
+    <div class="block block-mech">
+      <div class="block-label"><span class="icon">⚙️</span><span class="label-text">メカニズム</span></div>
+      <div class="callout callout-mech">
+        <ul>
+          <li>PRF = パルス繰り返し周波数（1秒間の送受信回数）</li>
+          <li>ナイキスト限界 = <strong>PRF / 2</strong>。これを超えるドプラシフトは正しくサンプリングできない</li>
+          <li>パルスドプラ波形：基線を越えて上下が入れ替わって表示</li>
+          <li>カラードプラ：赤↔青が急激に反転表示</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-clin">
+      <div class="block-label"><span class="icon">🏥</span><span class="label-text">臨床的意義</span></div>
+      <div class="callout callout-clin">
+        <ul>
+          <li>対処①：<strong>PRF（速度レンジ）を上げる</strong> → より高速な血流を計測可能に</li>
+          <li>対処②：<strong>ベースライン（基線）を移動</strong> → 一方向の表示範囲を拡大</li>
+          <li>対処③：<strong>連続波ドプラ（CWD）に切り替え</strong> → 原理的にエイリアシングが生じない</li>
+          <li>対処④：低周波プローブに変更 → ドプラシフト量が減少</li>
+          <li>狭窄部・弁逆流など高速血流の評価で頻発。カラードプラでモザイクパターンとして現れ、血流乱流のサインにもなる</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="block-label"><span class="icon">🔍</span><span class="label-text">関連概念・鑑別</span></div>
+      <div class="callout callout-diff">
+        <ul>
+          <li><strong>エイリアシング vs 乱流</strong>：乱流はカラードプラでモザイク様表示（多方向の色混在）、エイリアシングは色が鏡面的に「反転」する点が異なる</li>
+          <li><strong>パルスドプラ vs 連続波ドプラ</strong>：前者はエイリアシングあり（深度弁別能あり）、後者はなし（深度弁別なし）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block block-warn">
+      <div class="block-label"><span class="icon">⚠️</span><span class="label-text">注意点</span></div>
+      <div class="callout callout-warn">
+        PRFを上げすぎると最大深度が浅くなる（深い部位から送受信する時間が確保できなくなる）。深部の高速血流計測では連続波ドプラが安全策。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Claude補足 -->
+<div class="claude-note">
+  <div class="claude-note-title">
+    <span>💡</span> Claude 補足
+  </div>
+  <ul>
+    <li><strong>音速の固定値について</strong>：装置は生体内音速を1,540 m/s（または1,540 m/s近似）として距離計算を行う。実際には脂肪（約1,450 m/s）や骨（約3,500 m/s）で大きく異なり、これが「音速アーチファクト」（深さの誤計算）の原因になる。NotebookLMの資料には記載がないため補足。</li>
+    <li><strong>減衰係数の具体値</strong>：軟部組織での減衰係数は概ね 0.5 dB/cm/MHz。5MHz・10cmでは 5×10×0.5 = 25 dB 減衰（往復で50 dB）。試験では「周波数×深さ（cm）×0.5」の計算が問われることがある。</li>
+    <li><strong>エイリアシングの対処に「角度修正」は含まれない</strong>：ドプラ角度を小さくすると検出速度が見かけ上下がりエイリアシングが悪化することもある。対処の優先順位は①PRF↑、②ベースライン移動、③CWD切替。</li>
+    <li><strong>整合層（matching layer）</strong>：D4.9で言及したプローブ設計の重要技術。λ/4の厚みの材料を振動子前面に設け、音響インピーダンスを段階的に変化させることで透過効率を最大化する。臨床現場では意識しないが原理として知っておくと良い。</li>
+  </ul>
+</div>
+
+</main>
+
+<footer>
+  <p>POCUS—LOOP　|　Chapter 01：超音波の基礎物理（D4.1〜D4.11）</p>
+  <p>参考：Hoppmann et al. (2022). <em>Point-of-care ultrasound in medical education</em>.</p>
+  <p style="margin-top:8px;font-size:11px;">D4.xx = Didactic Module 4, Item xx（Hoppmann分類に基づく項目番号）</p>
+</footer>
+
+<script>
+function toggle(id) {
+  const item = document.getElementById(id);
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>
