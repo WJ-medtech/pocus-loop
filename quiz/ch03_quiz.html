@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch03 問題集 プローブの構造 | POCUS—LOOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== DESIGN SYSTEM ===== */
+  :root {
+    --bg:           #0d1117;
+    --bg-card:      #161b22;
+    --bg-card2:     #1c2330;
+    --border:       #30363d;
+    --border-light: #21262d;
+    --accent:       #58a6ff;
+    --accent2:      #3fb950;
+    --accent3:      #d29922;
+    --accent4:      #f78166;
+    --correct:      #238636;
+    --correct-bg:   rgba(35,134,54,.15);
+    --correct-b:    rgba(35,134,54,.4);
+    --wrong-bg:     rgba(218,54,51,.15);
+    --wrong-b:      rgba(218,54,51,.4);
+    --text:         #e6edf3;
+    --text-muted:   #8b949e;
+    --text-dim:     #656d76;
+    --radius:       12px;
+    --radius-sm:    8px;
+    --font-display: 'Syne', sans-serif;
+    --font-body:    'Noto Sans JP', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,17,23,.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -.02em;
+    text-decoration: none;
+  }
+  .logo span { color: var(--text-muted); font-weight: 400; }
+  .back-link {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--accent); }
+  .back-link::before { content: '←'; font-size: 15px; }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: 56px 20px 40px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .chapter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(210,153,34,.15);
+    border: 1px solid rgba(210,153,34,.4);
+    color: var(--accent3);
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent3);
+  }
+  .hero-desc {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 560px;
+    margin-bottom: 28px;
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats-bar {
+    max-width: 800px;
+    margin: 0 auto 32px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .stat-badge {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+  .badge-easy   { background: rgba(63,185,80,.15); color: var(--accent2); border: 1px solid rgba(63,185,80,.3); }
+  .badge-mid    { background: rgba(210,153,34,.15); color: var(--accent3); border: 1px solid rgba(210,153,34,.3); }
+  .badge-hard   { background: rgba(247,129,102,.15); color: var(--accent4); border: 1px solid rgba(247,129,102,.3); }
+
+  .progress-wrap {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  #score-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  /* ===== FILTER TABS ===== */
+  .filter-tabs {
+    max-width: 800px;
+    margin: 0 auto 24px;
+    padding: 0 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    background: rgba(210,153,34,.1);
+  }
+
+  /* ===== MAIN ===== */
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ===== QUESTION CARD ===== */
+  .q-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+
+  .q-header {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .q-num {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-dim);
+    min-width: 28px;
+  }
+  .diff-tag {
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .diff-easy { background: rgba(63,185,80,.15);  color: var(--accent2); }
+  .diff-mid  { background: rgba(210,153,34,.15); color: var(--accent3); }
+  .diff-hard { background: rgba(247,129,102,.15);color: var(--accent4); }
+
+  .q-angle {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-display);
+  }
+
+  .q-body {
+    padding: 16px 20px 0;
+  }
+  .q-text {
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  /* ===== OPTIONS ===== */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .option-btn {
+    width: 100%;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: all .18s;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .option-btn:hover:not([disabled]) {
+    border-color: var(--accent);
+    background: rgba(88,166,255,.07);
+  }
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+  .option-btn.wrong {
+    border-color: rgba(218,54,51,.5);
+    background: var(--wrong-bg);
+    opacity: .7;
+  }
+  .option-btn[disabled] { cursor: default; }
+
+  .opt-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 22px;
+    padding-top: 1px;
+  }
+  .option-btn.correct .opt-label { color: var(--accent2); }
+  .option-btn.wrong   .opt-label { color: var(--accent4); }
+
+  /* ===== REVEAL BUTTON ===== */
+  .reveal-wrap {
+    padding: 0 20px 20px;
+  }
+  .reveal-btn {
+    background: var(--bg-card2);
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    transition: all .18s;
+    letter-spacing: .02em;
+  }
+  .reveal-btn:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+  .reveal-btn.hidden-mode { display: none; }
+
+  /* ===== EXPLANATION ===== */
+  .explanation {
+    display: none;
+    margin: 0 20px 20px;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    animation: fadeSlide .2s ease;
+  }
+  .explanation.visible { display: block; }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .explanation h5 {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .explanation p, .explanation li {
+    font-size: 13px;
+    color: #c9d1d9;
+    line-height: 1.75;
+  }
+  .explanation ul {
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .correct-ans {
+    display: inline-block;
+    background: var(--correct-bg);
+    border: 1px solid var(--correct-b);
+    color: var(--accent2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  /* ===== RESET BUTTON ===== */
+  .reset-section {
+    max-width: 800px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .reset-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .reset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  .footer-d4 {
+    display: inline-block;
+    margin-top: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: .05em;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 600px) {
+    .q-text { font-size: 14px; }
+    .option-btn { font-size: 13px; }
+    .hero h1 { font-size: 26px; }
+    .stats-bar { gap: 10px; }
+    .progress-wrap { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="../index.html" class="logo">POCUS<span>—</span>LOOP</a>
+  <a href="../index.html" class="back-link">目次に戻る</a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="chapter-tag">Chapter 03 ・ 問題集</div>
+  <h1>プローブの構造<br><em>4択問題</em></h1>
+  <p class="hero-desc">D4.17〜D4.20の全範囲を網羅。選択肢をクリックして答えを確認しよう。</p>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><span class="stat-badge badge-easy">初級</span> 定義・基本</div>
+  <div class="stat-item"><span class="stat-badge badge-mid">中級</span> メカニズム</div>
+  <div class="stat-item"><span class="stat-badge badge-hard">上級</span> 臨床応用</div>
+  <div class="progress-wrap">
+    回答済み：<span id="score-display">0 / 0</span>
+  </div>
+</div>
+
+<!-- FILTER -->
+<div class="filter-tabs">
+  <button class="filter-btn active" data-filter="all">すべて</button>
+  <button class="filter-btn" data-filter="easy">初級</button>
+  <button class="filter-btn" data-filter="mid">中級</button>
+  <button class="filter-btn" data-filter="hard">上級</button>
+  <button class="filter-btn" data-filter="D4.17">D4.17</button>
+  <button class="filter-btn" data-filter="D4.18">D4.18</button>
+  <button class="filter-btn" data-filter="D4.19">D4.19</button>
+  <button class="filter-btn" data-filter="D4.20">D4.20</button>
+</div>
+
+<!-- QUESTIONS -->
+<main id="quiz-main"></main>
+
+<div class="reset-section">
+  <button class="reset-btn" onclick="resetAll()">🔄 全問リセット</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>POCUS—LOOP 学習教材 | 参考文献：<a href="#" target="_blank">Hoppmann et al. 2022</a></p>
+  <p>Point-of-Care Ultrasound — Learning Objectives &amp; Practical Guidelines</p>
+  <span class="footer-d4">本ページ収録範囲：D4.17 — D4.20（プローブの構造）</span>
+</footer>
+
+<script>
+const QUESTIONS = [
+  // ===== D4.17 プローブ本体 =====
+  {
+    id: 1, section: "D4.17", diff: "easy", angle: "定義",
+    text: "超音波プローブ（探触子）の基本的な役割として最も正確な記述はどれか。",
+    options: [
+      "電気エネルギーを光エネルギーに変換して体内を照射する",
+      "電気エネルギーと音響エネルギーを相互に変換して超音波の送受信を行う",
+      "磁場を利用して体内組織のプロトンを励起し画像を得る",
+      "X線を発生させて体内の透過像を取得する"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>プローブは<strong>電気エネルギー↔音響エネルギー</strong>の相互変換デバイスです。圧電素子に電気を加えると振動（音波）が発生し（逆圧電効果）、返ってきた音波を受けると電気信号が生じます（正圧電効果）。<br>Aは内視鏡的光線治療、CはMRI、DはX線CTの原理であり、超音波とは全く異なります。</p>`
+  },
+  {
+    id: 2, section: "D4.17", diff: "easy", angle: "構造",
+    text: "プローブ内部の構造を、先端（体表面側）から順に正しく並べたものはどれか。",
+    options: [
+      "バッキング材 → 圧電素子 → 整合層 → 音響レンズ",
+      "音響レンズ → 整合層 → 圧電素子 → バッキング材",
+      "整合層 → 音響レンズ → バッキング材 → 圧電素子",
+      "圧電素子 → バッキング材 → 整合層 → 音響レンズ"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>先端から <strong>音響レンズ → 整合層 → 圧電素子 → バッキング材</strong> の順です。<br>
+    音響レンズ：スライス方向のフォーカス調整。<br>整合層：生体との音響インピーダンスの差を埋めて効率よく音波を透過。<br>圧電素子：超音波の発生・受信を担う心臓部。<br>バッキング材：後方で余分な振動を吸収しパルス幅を短縮。</p>`
+  },
+  {
+    id: 3, section: "D4.17", diff: "mid", angle: "メカニズム",
+    text: "高周波プローブが浅部の観察に適し、低周波プローブが深部の観察に適している理由として正しいのはどれか。",
+    options: [
+      "高周波音波は波長が短く分解能が高いが生体内での減衰が大きいため",
+      "高周波音波は生体内での減衰が少なく、より遠くまで到達するため",
+      "低周波音波は周波数が低いほどエコー強度が大きく深部で反射しやすいため",
+      "プローブの形状（リニア vs コンベックス）が周波数と連動して走査深度を決めているため"
+    ],
+    correct: 0,
+    explanation: `<span class="correct-ans">正解：A</span>
+    <p>高周波音波は波長が短いため<strong>空間分解能が高い</strong>が、生体組織内での<strong>減衰係数が大きく</strong>深部まで到達しません（深度↓）。一方、低周波音波は減衰が少なく深部まで到達しますが波長が長く分解能は低下します。<br>選択肢Bは高周波と低周波の説明が逆です。Cは誤りで、エコー強度は反射界面のインピーダンス差によります。Dも誤りで、形状と周波数は独立したパラメータです。</p>`
+  },
+  {
+    id: 4, section: "D4.17", diff: "mid", angle: "臨床応用",
+    text: "緊急腹部超音波で肝臓の深部病変を確認したい。最も適切なプローブの種類と周波数帯はどれか。",
+    options: [
+      "高周波リニアプローブ（10〜15 MHz）",
+      "低周波コンベックスプローブ（2〜5 MHz）",
+      "高周波セクタプローブ（8〜12 MHz）",
+      "中周波ラジアルプローブ（6〜9 MHz）"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>深部臓器の観察には<strong>低周波（2〜5 MHz）コンベックスプローブ</strong>が適しています。コンベックスは扇形の広い視野で腹部臓器全体を映し、低周波で十分な深達度を確保できます。<br>高周波リニアは血管・甲状腺・筋骨格など表在構造向け。セクタ（フェーズドアレイ）は心臓や肋間から心臓を見るため。ラジアルは内視鏡超音波などに使われます。</p>`
+  },
+  {
+    id: 5, section: "D4.17", diff: "hard", angle: "安全性",
+    text: "超音波プローブの感染対策として、Spauldingの分類に基づく適切な消毒レベルの組み合わせはどれか。",
+    options: [
+      "体表（腹部）プローブ→高水準消毒、経食道プローブ→低水準消毒",
+      "体表（腹部）プローブ→低水準消毒、経食道プローブ→高水準消毒",
+      "両方とも必ず高水準消毒が必要",
+      "超音波プローブはSpauldingの分類対象外である"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>Spauldingの分類では、デバイスの侵襲度に応じて消毒レベルを分類します。<br>
+    ・<strong>体表プローブ（非侵襲）</strong>→ ノンクリティカル機器に相当 → <strong>低水準〜中水準消毒</strong><br>
+    ・<strong>経食道プローブ（粘膜接触）</strong>→ セミクリティカル機器に相当 → <strong>高水準消毒</strong><br>
+    経食道プローブを低水準消毒で使い回すと感染リスクが高く危険です。施設のSOP（標準操作手順）に従うことが重要です。</p>`
+  },
+  {
+    id: 6, section: "D4.17", diff: "hard", angle: "臨床シナリオ",
+    text: "超音波検査中、プローブのヘッド部が異常に熱くなっていることに気づいた。この状況で最も問題となるリスクはどれか。",
+    options: [
+      "ゲルの粘性が変化し音波の伝達が悪くなるのみで、生体への影響はない",
+      "眼球や胎児への熱的生体影響リスクがあり、速やかに使用を中止・点検すべきである",
+      "プローブの周波数が一時的に変動し画質が粗くなるだけである",
+      "漏れ電流が増加して装置本体の回路に損傷を与えるリスクがある"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>プローブ先端の異常な発熱は<strong>熱的生体影響</strong>のリスクがあります。特に<strong>眼球・胎児（脳・脊髄）</strong>は熱感受性が高く、過度な超音波暴露で組織損傷が生じる可能性があります（TI: Thermal Index がその指標）。<br>A・Cは過小評価。Dは誤り（漏れ電流はケーブル損傷が主要因）。異常な発熱を検知した場合は即使用停止・点検が原則です。</p>`
+  },
+
+  // ===== D4.18 圧電素子 =====
+  {
+    id: 7, section: "D4.18", diff: "easy", angle: "定義",
+    text: "圧電効果とは何か。最も正確な説明はどれか。",
+    options: [
+      "電気抵抗に電流を流すと熱が発生する現象",
+      "物質に電圧を加えると機械的に変形し振動を発生させ、逆に振動を受けると電圧を生じる現象",
+      "磁場の変化によって物質内に電流が誘導される現象",
+      "光エネルギーを受けると電子を放出する現象"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p><strong>圧電効果</strong>は双方向性が特徴です。<br>
+    ・<strong>逆圧電効果</strong>（電気→振動）：電圧を加えると結晶格子が歪み、超音波を送信<br>
+    ・<strong>正圧電効果</strong>（振動→電気）：エコーを受けて振動すると電圧が発生、受信信号となる<br>
+    Aはジュール熱（電気→熱）、Cは電磁誘導、Dは光電効果の説明で、いずれも超音波の原理ではありません。</p>`
+  },
+  {
+    id: 8, section: "D4.18", diff: "easy", angle: "材料",
+    text: "現在の超音波プローブの圧電素子に主に使用される材料として正しいものを2つ選んだ場合、その組み合わせはどれか。",
+    options: [
+      "PZT（ジルコン酸チタン酸鉛）とPVDF（ポリフッ化ビニリデン）",
+      "シリコンとゲルマニウム",
+      "ニオブ酸リチウムとガリウム砒素",
+      "石英とチタン合金"
+    ],
+    correct: 0,
+    explanation: `<span class="correct-ans">正解：A</span>
+    <p><strong>PZT</strong>はセラミック系圧電材料の代表。高い電気機械変換効率を持ち、現在の多くのプローブに使用されています。<strong>PVDF</strong>は高分子圧電膜で、広帯域特性（広い周波数範囲に応答）に優れます。<br>近年はMUT（微細加工超音波探触子：CMUT/PMUTなど）と呼ばれる半導体プロセス製のデバイスも登場しています。B〜Dに挙げた材料は圧電素子としては一般的ではありません。</p>`
+  },
+  {
+    id: 9, section: "D4.18", diff: "mid", angle: "メカニズム",
+    text: "圧電素子の共振周波数(fz)を決める要因として正しい式と説明の組み合わせはどれか。",
+    options: [
+      "fz = c × 2L（素子が厚いほど高周波になる）",
+      "fz = c / 2L（素子が薄いほど高周波になる）",
+      "fz = 2c / L（素子の幅が狭いほど高周波になる）",
+      "fz = L / 2c（素子が厚いほど低周波になる）"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p><strong>fz = c / 2L</strong>（c：素子材料内の音速、L：素子の厚み）<br>素子の厚みLが小さい（薄い）ほど、共振周波数fzは<strong>高く</strong>なります。逆に厚いほど低周波になります。<br>臨床的には「高周波プローブの圧電素子は薄い」と覚えましょう。なお、cは生体内の音速（約1540 m/s）ではなく<strong>素子材料内の音速</strong>である点も重要です。</p>`
+  },
+  {
+    id: 10, section: "D4.18", diff: "mid", angle: "構造",
+    text: "プローブ内でバッキング材（制動材）が果たす役割として最も正確なものはどれか。",
+    options: [
+      "生体と圧電素子の音響インピーダンス差を小さくし、超音波を効率よく生体に透過させる",
+      "圧電素子の後方で余分な振動を吸収・減衰させ、送信パルス幅を短くして分解能を向上させる",
+      "音波を前方（体表側）でフォーカスさせ、特定深度での横分解能を改善する",
+      "プローブ先端をコーティングして防水性と絶縁性を確保する"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p><strong>バッキング材</strong>は圧電素子の<strong>後方（体表と逆側）</strong>に配置され、励振後に素子が長く振動し続けるのを防ぎます。これにより送信パルスが短くなり、軸（深さ方向）分解能が向上します。<br>Aは「整合層」の役割。Cは「音響レンズ」の役割。D は音響レンズ兼外装ケースの役割。混同しないよう各部品の位置と機能をセットで覚えましょう。</p>`
+  },
+  {
+    id: 11, section: "D4.18", diff: "mid", angle: "メカニズム",
+    text: "電子スキャンにおいて「電子フォーカス」を実現するための原理として正しいのはどれか。",
+    options: [
+      "全素子を同時に駆動して大出力の音圧を発生させることで特定深度を強調する",
+      "各素子の駆動タイミングに遅延差を与えることでビームの収束（フォーカス）を制御する",
+      "素子の一部を物理的に前後移動させて焦点距離を変える",
+      "発信周波数をリアルタイムに変調して焦点深度を調整する"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p><strong>遅延制御（タイミングオフセット）</strong>が電子フォーカスの原理です。端の素子を少し先に駆動し、中央の素子を少し遅らせて駆動すると（または逆に）、波面が特定の点に収束します。この遅延パターンを変えるだけでソフトウェア的に焦点位置を任意に変更できます。<br>Cは物理的フォーカス（音響レンズ）の考え方。Aは出力増強であってフォーカスではありません。</p>`
+  },
+  {
+    id: 12, section: "D4.18", diff: "hard", angle: "臨床シナリオ",
+    text: "Bモード画像で特定の深さに一定幅の縦縞（無エコー帯）が複数本出現した。最も考えられる原因はどれか。",
+    options: [
+      "ゲルの塗布量が多すぎて音響結合が過剰になっている",
+      "圧電素子の一部が破損または機能不全を起こしている",
+      "ケーブルの断線により全エコー信号が途絶している",
+      "設定した焦点深度が不適切で全体的にぼけている"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>縦縞（無エコー帯または高エコー帯）は<strong>特定素子の機能不全</strong>の典型的なサインです。各素子は特定の「列」の信号を担当するため、素子が壊れるとその列が丸ごと消えたり乱れたりします。<br>Aはゲルの問題で全体的な接触不良アーチファクトを引き起こします。Cのケーブル全断では画像全体が消えます。Dのフォーカス不良は全体的なぼけであり局所的な縦縞にはなりません。</p>`
+  },
+
+  // ===== D4.19 マーカー =====
+  {
+    id: 13, section: "D4.19", diff: "easy", angle: "定義",
+    text: "プローブマーカーとスクリーンマーカーについての説明として最も正確なものはどれか。",
+    options: [
+      "プローブマーカーは電源インジケータ、スクリーンマーカーは被検者IDの表示位置を示す",
+      "プローブマーカーはプローブ側面の突起・溝・発光部、スクリーンマーカーは画面上のドット・ロゴで、2つを対応させることで画像の方向を確認する",
+      "プローブマーカーとスクリーンマーカーは同一のものを指す別称である",
+      "スクリーンマーカーは画像の上下を示し、プローブマーカーは左右を示す"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p><strong>プローブマーカー</strong>：プローブ本体の物理的目印（側面の突起・溝・LEDなど）<br>
+    <strong>スクリーンマーカー</strong>：モニタ画面に表示される目印（メーカーロゴ・ドットなど）<br>
+    この2つを<strong>セットで対応</strong>させることで、「画面上の右（または左）が患者のどの方向か」を正確に把握します。2つは別物であり（A・C）、それぞれが独立した役割を持ちます（D）。</p>`
+  },
+  {
+    id: 14, section: "D4.19", diff: "mid", angle: "臨床応用",
+    text: "一般的な腹部超音波の縦走査（矢状断）では、プローブマーカーをどの方向に向けるのが標準的か。",
+    options: [
+      "患者の左側（画面右側にマーカー）",
+      "患者の頭側（画面左側にマーカー）",
+      "患者の右側（画面右側にマーカー）",
+      "患者の足側（画面左側にマーカー）"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>腹部超音波の縦走査（矢状断）では、<strong>マーカーを患者の頭側に向け、画面の左側</strong>にマーカーが表示されるようにするのが一般的な慣例です。これにより画面左が頭側、右が足側となります。<br>なお、<strong>心エコー</strong>では慣例が異なり、スクリーンマーカーを画面右側に置きます。領域ごとの慣例の違いを混同しないよう注意が必要です。</p>`
+  },
+  {
+    id: 15, section: "D4.19", diff: "mid", angle: "鑑別",
+    text: "腹部超音波と心エコーでマーカーの画面配置が異なる理由として最も適切な説明はどれか。",
+    options: [
+      "超音波装置のメーカーが異なるため自動的に設定が異なる",
+      "歴史的・慣例的経緯により領域ごとに標準化された向きが異なり、意識的に切り替える必要がある",
+      "心臓は左胸にあるため物理的にプローブを逆に当てざるを得ないため",
+      "心エコーは高周波プローブを使用するためマーカーの方向が自動反転する"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>腹部超音波（ラジオロジー系）と心エコー（カーディオロジー系）でのスクリーンマーカー配置の違いは<strong>歴史的・慣例的なもの</strong>です。装置の物理的な制約ではなく、オリエンテーションボタンで反転設定できます。<br>臨床現場では検査前に「今どちらの設定か」を確認する習慣が重要です。知らずに腹部設定で心エコーを行うと画像の左右が逆になり診断を誤る危険があります。</p>`
+  },
+  {
+    id: 16, section: "D4.19", diff: "hard", angle: "臨床シナリオ",
+    text: "超音波ガイド下中心静脈穿刺を行う際、マーカーの方向を誤って把握したまま操作した場合に最も起きやすい問題はどれか。",
+    options: [
+      "プローブとモニタの距離が遠くなり画質が低下する",
+      "画像上で針が向かっている方向と実際の針の方向が逆になり誤穿刺リスクが高まる",
+      "超音波ビームが血管を横断せず縦断してしまい血管径が正確に測れない",
+      "静脈と動脈の識別が困難になる"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>マーカーの方向を誤認すると<strong>画像上の左右（または頭尾）が実際と逆になります</strong>。針を画面左に向かって進めているつもりが実際は右方向に進んでいる、という状況が起き、<strong>隣接する動脈や神経への誤穿刺</strong>が生じます。これは重篤な合併症の原因となります。<br>A・Cは別の問題。D（静動脈識別）はカラードプラなどで確認すべき事項で、マーカー誤認とは直接関係しません。<br>手技前のマーカー確認は「Never Skip」の習慣です。</p>`
+  },
+
+  // ===== D4.20 コード =====
+  {
+    id: 17, section: "D4.20", diff: "easy", angle: "定義",
+    text: "超音波プローブのコード（ケーブル）の役割として正しいのはどれか。",
+    options: [
+      "プローブを装置に固定して物理的安定性を確保するための支持部材",
+      "プローブ本体と装置本体を接続し、駆動電気信号とエコー信号を双方向に伝送する",
+      "ゲルを一定温度に保つための加温線が含まれている",
+      "プローブ先端の圧電素子を冷却するための熱交換経路"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>コードは<strong>プローブ⟷装置間の電気信号伝送路</strong>です。送信時は装置からプローブの各圧電素子への駆動パルスを伝送し、受信時はエコー電気信号を装置に送ります。高密度な多芯構造になっており、各素子への個別配線が含まれています。<br>A（支持）・C（加温）・D（冷却）はいずれもコードの機能ではありません。</p>`
+  },
+  {
+    id: 18, section: "D4.20", diff: "easy", angle: "安全",
+    text: "超音波プローブのケーブル損傷で最も多い原因はどれか。",
+    options: [
+      "使用後のゲル拭き取り時に強くこすりすぎること",
+      "装置のキャスタ（車輪）でケーブルを踏むこと",
+      "長時間の連続使用による熱疲労",
+      "ケーブルを短く束ねて保管すること"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>ケーブルの損傷原因として<strong>最も多いのはキャスタによる踏みつけ</strong>です。ベッドサイドで装置を移動する際、ケーブルが床に垂れたままになっていると車輪で踏まれ、外装が損傷したり内部断線したりします。<br>予防策：移動前に必ずケーブルをまとめて床から上げる、フックやケーブルホルダーを使用する。A・C・Dも注意は必要ですが、最多原因はBです。</p>`
+  },
+  {
+    id: 19, section: "D4.20", diff: "mid", angle: "安全性",
+    text: "超音波プローブのケーブルが電気的安全性の観点から重要な理由として最も適切なものはどれか。",
+    options: [
+      "ケーブル内に高電圧が常時印加されており、外装損傷で検査者が感電するリスクがある",
+      "ケーブルは漏れ電流（患者漏れ電流・接触電流・接地漏れ電流）の潜在的経路となり得る",
+      "ケーブル内を流れる電流が磁場を発生させ、装置の画質に干渉する",
+      "ケーブルの静電容量が大きいと超音波の周波数が変動する"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>医用電気機器において、<strong>漏れ電流</strong>は患者安全の重要指標です。<br>
+    ・<strong>患者漏れ電流</strong>：患者に流れ込む漏れ電流（最重要）<br>
+    ・<strong>接触電流</strong>：操作者に流れる漏れ電流<br>
+    ・<strong>接地漏れ電流</strong>：接地線に流れる漏れ電流<br>
+    ケーブル外装の損傷はこれらの漏れ電流増大の直接原因となります。日本ではJIS T 0601-1に基づく電気安全規格が適用されます。外装損傷を確認したら即使用停止・点検が原則です。</p>`
+  },
+  {
+    id: 20, section: "D4.20", diff: "mid", angle: "鑑別",
+    text: "ケーブルの断線によって生じる画像変化と、圧電素子の部分破損によって生じる画像変化の違いとして最も正確なのはどれか。",
+    options: [
+      "ケーブル断線では局所的な縦縞アーチファクト、素子破損では画像全体の消失が生じる",
+      "ケーブル断線では広範囲・全体的な信号消失やノイズ、素子破損では特定の列に沿う局所的な縦縞が生じやすい",
+      "どちらも同一の縦縞アーチファクトを生じるため外観検査のみで区別できる",
+      "ケーブル断線は画質には影響せず、電源が切れるだけである"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p><strong>ケーブル断線</strong>：多くの素子への信号が一度に遮断されるため、広範囲の信号消失や全体的なノイズとして現れることが多い。<br>
+    <strong>素子の部分破損</strong>：その素子が担当する特定の「列」の信号のみが欠損するため、<strong>局所的な縦縞・無エコー帯</strong>として現れやすい。<br>
+    両者の鑑別は故障部位の特定（プローブ側 vs ケーブル側）に重要で、修理・交換の判断に直結します。</p>`
+  },
+  {
+    id: 21, section: "D4.20", diff: "hard", angle: "臨床シナリオ",
+    text: "救急外来でのFAST検査中、プローブのケーブル外装に明らかな亀裂を発見した。この状況で取るべき最も適切な対応はどれか。",
+    options: [
+      "画像が出ていれば問題なく使用を継続できる",
+      "テープで補修して引き続き使用する",
+      "使用を中止して代替プローブに変更し、損傷プローブは点検・修理に回す",
+      "ケーブルを折り曲げて断線部分を避ければ使用可能である"
+    ],
+    correct: 2,
+    explanation: `<span class="correct-ans">正解：C</span>
+    <p>ケーブル外装の亀裂は<strong>即使用停止</strong>の適応です。<br>理由：<br>
+    ① <strong>漏れ電流リスク</strong>：外装損傷により患者や術者への漏れ電流増大<br>
+    ② <strong>感染リスク</strong>：内部に汚染物質が侵入する<br>
+    ③ <strong>画質劣化</strong>：ノイズ・信号消失による診断誤差<br>
+    緊急時でも代替プローブへ切り替えるのが原則。A（使用継続）・B（テープ補修）・D（折り曲げ回避）はいずれも不十分であり、患者安全を損なう危険な対応です。</p>`
+  },
+
+  // ===== CROSS-SECTION（複合）=====
+  {
+    id: 22, section: "D4.18", diff: "hard", angle: "メカニズム",
+    text: "整合層（マッチング層）をプローブに設ける理由として最も正確なものはどれか。",
+    options: [
+      "圧電素子の機械的強度を補強して衝撃から守るため",
+      "圧電素子（PZT）と生体組織の音響インピーダンスの差が大きいため、その差を段階的に埋めて超音波エネルギーの反射損失を最小化するため",
+      "超音波ビームを特定の深度でフォーカスするための音響レンズとして機能するため",
+      "素子が発生した熱を体外に放散させる熱伝導層として機能するため"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p><strong>音響インピーダンス（Z = ρ×c）</strong>が異なる境界面では超音波エネルギーが反射されます。PZTの音響インピーダンス（約30 MRayl）は生体組織（約1.5 MRayl）と大きく異なるため、直接接触させるとほとんどのエネルギーが反射してしまいます。<br><strong>整合層</strong>は中間の音響インピーダンスを持つ材料を1層〜複数層挿入することで、反射損失を段階的に減らし、より多くのエネルギーを生体内に伝達します（超音波の「アダプター」）。<br>フォーカスは音響レンズ（C）、冷却は別の機構（D）です。</p>`
+  },
+  {
+    id: 23, section: "D4.19", diff: "hard", angle: "臨床シナリオ",
+    text: "超音波で腹部横断走査を行ったところ、画面左側に構造物が見えた。マーカーが患者右側を向いていることを確認した場合、この構造物は患者のどちら側に位置するか。",
+    options: [
+      "患者の左側",
+      "患者の右側",
+      "患者の頭側",
+      "患者の足側"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>腹部横断走査の標準設定では<strong>マーカー（患者右側）→ 画面左側</strong>に対応します。<br>したがって画面左側に映っているものは<strong>患者の右側</strong>の構造物です（解剖学的な向き：患者から正面を見る視点）。<br>マーカーの向きと画面上の方向の対応関係を瞬時に判断できるようになることが、正確な超音波診断の基礎です。混乱したときは「マーカーが指す方向＝画面のスクリーンマーカーが表示される端」という原則に立ち返りましょう。</p>`
+  },
+  {
+    id: 24, section: "D4.17", diff: "mid", angle: "鑑別",
+    text: "リニアプローブ・コンベックスプローブ・セクタプローブの視野形状の組み合わせとして正しいものはどれか。",
+    options: [
+      "リニア＝扇形、コンベックス＝四角形、セクタ＝台形",
+      "リニア＝四角形、コンベックス＝扇形（台形）、セクタ＝扇形（細い）",
+      "リニア＝円形、コンベックス＝四角形、セクタ＝扇形",
+      "3種類とも同一の四角形視野であり違いは周波数のみ"
+    ],
+    correct: 1,
+    explanation: `<span class="correct-ans">正解：B</span>
+    <p>
+    ・<strong>リニアプローブ</strong>：素子を直線配置→<strong>四角形（矩形）視野</strong>。表在組織・血管・筋骨格向け。<br>
+    ・<strong>コンベックスプローブ</strong>：素子を凸状配置→<strong>扇形（台形に近い広い視野）</strong>。腹部・骨盤向け。<br>
+    ・<strong>セクタ（フェーズドアレイ）プローブ</strong>：電子的に偏向→<strong>扇形（接触面が小さく広がる視野）</strong>。心臓・肋間からの走査向け。<br>
+    形状の違いは「どこをどう見るか」の目的の違いを反映しています。</p>`
+  }
+];
+
+// ===== STATE =====
+let answered = new Set();
+let currentFilter = "all";
+
+function renderQuestions() {
+  const container = document.getElementById("quiz-main");
+  const filtered = currentFilter === "all"
+    ? QUESTIONS
+    : QUESTIONS.filter(q => q.diff === currentFilter || q.section === currentFilter);
+
+  container.innerHTML = "";
+  filtered.forEach((q, idx) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.dataset.qid = q.id;
+    card.dataset.diff = q.diff;
+    card.dataset.section = q.section;
+
+    const diffLabel = { easy: "初級", mid: "中級", hard: "上級" }[q.diff];
+    const diffClass = { easy: "diff-easy", mid: "diff-mid", hard: "diff-hard" }[q.diff];
+
+    const optionsHtml = q.options.map((opt, oi) => {
+      const label = ["A", "B", "C", "D"][oi];
+      return `<button class="option-btn" data-index="${oi}" onclick="selectOption(this, ${q.id}, ${oi}, ${q.correct})">
+        <span class="opt-label">${label}.</span>
+        <span>${opt}</span>
+      </button>`;
+    }).join("");
+
+    const isAnswered = answered.has(q.id);
+    const revealStyle = isAnswered ? 'style="display:none"' : '';
+    const explStyle = isAnswered ? 'class="explanation visible"' : 'class="explanation"';
+
+    card.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">Q${idx + 1}</span>
+        <span class="diff-tag ${diffClass}">${diffLabel}</span>
+        <span class="q-angle">${q.angle}</span>
+        <span class="q-angle" style="margin-left:auto; color:var(--text-dim)">${q.section}</span>
+      </div>
+      <div class="q-body">
+        <p class="q-text">${q.text}</p>
+        <div class="options">${optionsHtml}</div>
+      </div>
+      <div class="reveal-wrap">
+        <button class="reveal-btn" ${isAnswered ? 'style="display:none"' : ''} onclick="revealAnswer(this, ${q.id}, ${q.correct})">
+          💡 答えと解説を見る
+        </button>
+      </div>
+      <div ${explStyle} id="exp-${q.id}">
+        <h5>📋 解説</h5>
+        ${q.explanation}
+      </div>
+    `;
+
+    // Restore answered state visually
+    if (isAnswered) {
+      setTimeout(() => {
+        const opts = card.querySelectorAll(".option-btn");
+        opts[q.correct].classList.add("correct");
+        opts.forEach(b => b.disabled = true);
+      }, 10);
+    }
+
+    container.appendChild(card);
+  });
+
+  updateScore();
+}
+
+function selectOption(btn, qid, selectedIdx, correctIdx) {
+  const card = btn.closest(".q-card");
+  const allBtns = card.querySelectorAll(".option-btn");
+
+  if (allBtns[0].disabled) return; // already answered
+
+  allBtns.forEach(b => b.disabled = true);
+
+  if (selectedIdx === correctIdx) {
+    btn.classList.add("correct");
+  } else {
+    btn.classList.add("wrong");
+    allBtns[correctIdx].classList.add("correct");
+  }
+
+  answered.add(qid);
+  updateScore();
+
+  // Show explanation
+  const exp = card.querySelector(".explanation");
+  exp.classList.add("visible");
+  const revBtn = card.querySelector(".reveal-btn");
+  if (revBtn) revBtn.style.display = "none";
+}
+
+function revealAnswer(btn, qid, correctIdx) {
+  const card = btn.closest(".q-card");
+  const allBtns = card.querySelectorAll(".option-btn");
+
+  allBtns.forEach(b => b.disabled = true);
+  allBtns[correctIdx].classList.add("correct");
+
+  answered.add(qid);
+  updateScore();
+
+  const exp = card.querySelector(".explanation");
+  exp.classList.add("visible");
+  btn.style.display = "none";
+}
+
+function updateScore() {
+  const total = currentFilter === "all" ? QUESTIONS.length
+    : QUESTIONS.filter(q => q.diff === currentFilter || q.section === currentFilter).length;
+  const done = currentFilter === "all"
+    ? answered.size
+    : QUESTIONS.filter(q => answered.has(q.id) && (q.diff === currentFilter || q.section === currentFilter)).length;
+  document.getElementById("score-display").textContent = `${done} / ${total}`;
+}
+
+function resetAll() {
+  answered.clear();
+  renderQuestions();
+}
+
+// ===== FILTER BUTTONS =====
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.filter;
+    renderQuestions();
+  });
+});
+
+// ===== INIT =====
+renderQuestions();
+</script>
+</body>
+</html>

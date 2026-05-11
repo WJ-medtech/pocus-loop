@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch02 超音波モード｜POCUS-LOOP</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #2a3441;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --green: #39d353;
+    --yellow: #f0c419;
+    --red: #ff4757;
+    --blue: #58a6ff;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: rgba(22,27,34,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 20px;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-decoration: none;
+  }
+  .logo span { color: var(--text-muted); }
+  .back-link {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+  .back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #131a2a 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 20px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .chapter-badge {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.25);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .meta-tag {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  /* ── Main ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── Section nav ── */
+  .section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+  .section-nav a {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+  }
+  .section-nav a:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,229,255,0.05); }
+
+  /* ── Item card ── */
+  .item-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .item-card:hover { border-color: rgba(0,229,255,0.3); }
+
+  .item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    gap: 12px;
+  }
+  .item-header:hover { background: rgba(255,255,255,0.02); }
+
+  .item-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+  }
+  .item-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 3px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .item-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .item-title-jp {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .toggle-icon {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .item-card.open .toggle-icon { transform: rotate(180deg); }
+
+  .item-body {
+    display: none;
+    padding: 0 24px 28px;
+    border-top: 1px solid var(--border);
+  }
+  .item-card.open .item-body { display: block; }
+
+  /* ── Sections within body ── */
+  .section-block {
+    margin-top: 24px;
+  }
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sl-icon { font-size: 1rem; }
+  .sl-beginner .sl-text { color: var(--green); }
+  .sl-def .sl-text { color: var(--blue); }
+  .sl-mech .sl-text { color: var(--yellow); }
+  .sl-clinic .sl-text { color: var(--accent2); }
+  .sl-related .sl-text { color: var(--accent3); }
+  .sl-caution .sl-text { color: var(--red); }
+
+  .section-content {
+    font-size: 0.9rem;
+    line-height: 1.85;
+    color: #c9d1d9;
+  }
+  .section-content p { margin-bottom: 8px; }
+  .section-content ul, .section-content ol {
+    padding-left: 1.4em;
+    margin-bottom: 8px;
+  }
+  .section-content li { margin-bottom: 4px; }
+  .section-content strong { color: var(--text); font-weight: 600; }
+  .section-content code {
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85em;
+    color: var(--accent);
+  }
+
+  /* ── Highlight box ── */
+  .highlight-box {
+    background: rgba(0,229,255,0.05);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-size: 0.88rem;
+  }
+
+  /* ── Claude supplement ── */
+  .claude-supplement {
+    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(0,229,255,0.05));
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-top: 40px;
+  }
+  .claude-supplement h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .supp-item {
+    border-left: 2px solid var(--accent3);
+    padding-left: 16px;
+    margin-bottom: 18px;
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: #c9d1d9;
+  }
+  .supp-item strong { color: var(--text); }
+
+  /* ── Footer ── */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 32px 20px;
+    text-align: center;
+  }
+  .footer-inner { max-width: 900px; margin: 0 auto; }
+  .footer-credit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .footer-credit a { color: var(--accent); text-decoration: none; }
+  .footer-d4 {
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: #4a5568;
+  }
+
+  /* ── Quiz link banner ── */
+  .quiz-banner {
+    background: linear-gradient(90deg, rgba(255,107,53,0.12), rgba(255,107,53,0.05));
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .quiz-banner p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+  .quiz-banner strong { color: var(--text); }
+  .btn-quiz {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    color: var(--bg);
+    background: var(--accent2);
+    padding: 10px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .btn-quiz:hover { opacity: 0.85; }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    .item-header { padding: 16px 18px; }
+    .item-body { padding: 0 18px 22px; }
+    .item-title { font-size: 0.92rem; }
+    .quiz-banner { flex-direction: column; align-items: flex-start; }
+    .claude-supplement { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="logo">POCUS<span>—</span>LOOP</a>
+    <a href="../index.html" class="back-link">← 目次に戻る</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="chapter-badge">Chapter 02</div>
+    <h1>超音波<em>モード</em></h1>
+    <p style="color:var(--text-muted); font-size:0.9rem; max-width:560px;">Bモード・Mモード・カラーフローマッピング・パワードプラ・スペクトラルドプラの基礎から臨床応用まで</p>
+    <div class="hero-meta">
+      <span class="meta-tag">D4.12 Bモード</span>
+      <span class="meta-tag">D4.13 Mモード</span>
+      <span class="meta-tag">D4.14 CFM</span>
+      <span class="meta-tag">D4.15 パワードプラ</span>
+      <span class="meta-tag">D4.16 スペクトラルドプラ</span>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <div class="quiz-banner">
+    <div>
+      <p><strong>問題演習でアウトプット！</strong></p>
+      <p>この章の4択問題（16問）で理解を確認しよう</p>
+    </div>
+    <a href="../quiz/ch02_quiz.html" class="btn-quiz">問題集を開く →</a>
+  </div>
+
+  <nav class="section-nav">
+    <a href="#d412">D4.12 Bモード</a>
+    <a href="#d413">D4.13 Mモード</a>
+    <a href="#d414">D4.14 CFM</a>
+    <a href="#d415">D4.15 パワードプラ</a>
+    <a href="#d416">D4.16 スペクトラルドプラ</a>
+  </nav>
+
+  <!-- D4.12 -->
+  <div class="item-card open" id="d412">
+    <div class="item-header" onclick="toggleCard(this.parentElement)">
+      <div class="item-title-group">
+        <span class="item-num">D4.12</span>
+        <div>
+          <div class="item-title">Bモード（輝度モード）</div>
+          <div class="item-title-jp">B-mode / Brightness Mode</div>
+        </div>
+      </div>
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section-block">
+        <div class="section-label sl-beginner"><span class="sl-icon">🔰</span><span class="sl-text">初学者向け説明</span></div>
+        <div class="section-content">
+          <p>白黒写真を撮るカメラに例えると、超音波を体に当てて「跳ね返ってきた音の強さ」を明るさに変換した<strong>"体の断面写真"</strong>です。</p>
+          <p>骨や石灰化のように音をよく反射するものは<strong>白く</strong>、水や液体のように音をほとんど透過するものは<strong>黒く</strong>映ります。POCUSの「見た目」のベースになるのがこのモードです。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-def"><span class="sl-icon">📖</span><span class="sl-text">定義</span></div>
+        <div class="section-content">
+          <p>超音波パルスの反射強度（振幅）を輝度（Brightness）の強弱に変換し、2次元断層像として表示する描画法。超音波断層撮影の<strong>最も基本となるモード</strong>。反射が強いほど白く（高輝度）、弱いほど黒く（低輝度）表示される。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-mech"><span class="sl-icon">⚙️</span><span class="sl-text">メカニズム</span></div>
+        <div class="section-content">
+          <ul>
+            <li>超音波パルスを送信し、組織で反射して戻る<strong>時間から距離を算出</strong>（音速 ≈ 1,530〜1,540 m/s と仮定）</li>
+            <li>1回の送受信で<strong>1ライン（ラスター）</strong>を取得</li>
+            <li>ビーム方向を少しずつずらしながら（スキャン）繰り返すことで<strong>2次元断面像</strong>を構築</li>
+            <li>深部ほど信号が減衰するため、<strong>STC/TGC</strong>（深度補正回路）により深さ全体にわたって均一な輝度になるよう補正</li>
+            <li>微弱な信号の差を表示するため<strong>対数アンプ</strong>を使用</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-clinic"><span class="sl-icon">🏥</span><span class="sl-text">臨床的意義</span></div>
+        <div class="section-content">
+          <p>臓器の形態・サイズ・内部エコーパターン・境界の評価に使用。</p>
+          <ul>
+            <li>心嚢液・腹腔内遊離液・膀胱尿貯留・胸水など、<strong>液体貯留の確認</strong>は「無エコー（黒）の領域」として直感的に識別</li>
+            <li>全てのPOCUS評価の<strong>出発点</strong>となるモード</li>
+          </ul>
+          <div class="highlight-box">💡 液体 → 黒（無エコー）／骨・石灰化 → 白（高エコー）／軟部組織 → 灰色（中等度エコー）</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-related"><span class="sl-icon">🔍</span><span class="sl-text">関連概念・鑑別</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>Aモード（振幅モード）との違い</strong>：Aモードは反射強度を「グラフの高さ」で表す1次元表示。Bモードはそれを「輝点の明るさ」で2次元画像化したもの</li>
+            <li><strong>Mモードとの関係</strong>：Bモードの1ラインを時間軸に展開したもの</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-caution"><span class="sl-icon">⚠️</span><span class="sl-text">注意点</span></div>
+        <div class="section-content">
+          <ul>
+            <li>高エコー（白）≠ 必ず石灰化。<strong>脂肪・線維組織も白く</strong>映る</li>
+            <li>TGCの調整不足で<strong>深部が暗くなり病変を見逃す</strong>ことがある</li>
+            <li>音速 1,530 m/s の仮定は近似値。<strong>気体・骨では大きく異なる</strong></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- D4.13 -->
+  <div class="item-card" id="d413">
+    <div class="item-header" onclick="toggleCard(this.parentElement)">
+      <div class="item-title-group">
+        <span class="item-num">D4.13</span>
+        <div>
+          <div class="item-title">Mモード（モーションモード）</div>
+          <div class="item-title-jp">M-mode / Motion Mode</div>
+        </div>
+      </div>
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section-block">
+        <div class="section-label sl-beginner"><span class="sl-icon">🔰</span><span class="sl-text">初学者向け説明</span></div>
+        <div class="section-content">
+          <p>心臓の弁や壁が<strong>"ピコピコ動く様子"</strong>を、横向きのグラフとして記録するモードです。横軸が時間、縦軸が深さ。バウンシングボールの軌跡を横から撮影したようなイメージで、わずかな動きの量・速さ・タイミングを精密に測れます。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-def"><span class="sl-icon">📖</span><span class="sl-text">定義</span></div>
+        <div class="section-content">
+          <p>同一走査線上で超音波の送受信を高速に繰り返し、その線上の輝度変化を時間軸（横軸）に沿って表示するモード（Motion mode）。<strong>縦軸は深さ（距離）、横軸は時間</strong>を示す。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-mech"><span class="sl-icon">⚙️</span><span class="sl-text">メカニズム</span></div>
+        <div class="section-content">
+          <ul>
+            <li>プローブを動かさずに同一方向へ繰り返しパルスを送信</li>
+            <li>各タイミングで反射してきた輝度データを横に並べることで<strong>「位置の時間変化」を可視化</strong></li>
+            <li>通常はBモードと同時に表示（<strong>B/Mモード</strong>）し、Bモード上でサンプル線を指定してMモード波形を取得</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-clinic"><span class="sl-icon">🏥</span><span class="sl-text">臨床的意義</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>心臓</strong>：僧帽弁・大動脈弁の開閉タイミング・振幅の計測、左室壁厚・内径の計測（EF推定）</li>
+            <li><strong>IVC（下大静脈）</strong>：呼吸による虚脱の度合いから循環血液量の評価。IVC径 ≤ 2.1 cm ＋ 呼吸性虚脱 ≥ 50% → 右房圧低下（≤ 5 mmHg）と推定</li>
+            <li>時間分解能が高く、<strong>弁の動きや壁運動の「タイミング異常」</strong>を検出しやすい</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-related"><span class="sl-icon">🔍</span><span class="sl-text">関連概念・鑑別</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>Bモードとの違い</strong>：Bモードは空間的な2次元断面。Mモードは1直線上の時間的変化</li>
+            <li><strong>スペクトラルドプラとの違い</strong>：Mモードは「位置の変化」、スペクトラルドプラは「血流速度の変化」を時間軸で追う</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-caution"><span class="sl-icon">⚠️</span><span class="sl-text">注意点</span></div>
+        <div class="section-content">
+          <ul>
+            <li>ビームを目的の構造物に<strong>正確に当てないと誤った動態情報</strong>を得る</li>
+            <li>壁運動の「タイミング」解釈には<strong>心電図同期が理想的</strong>（R波と動きの対応）</li>
+            <li>POCUSでは簡易的なEF評価に用いるが、<strong>定量的精度はTTEに劣る</strong></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- D4.14 -->
+  <div class="item-card" id="d414">
+    <div class="item-header" onclick="toggleCard(this.parentElement)">
+      <div class="item-title-group">
+        <span class="item-num">D4.14</span>
+        <div>
+          <div class="item-title">カラーフローマッピング（CFM）</div>
+          <div class="item-title-jp">Color Flow Mapping</div>
+        </div>
+      </div>
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section-block">
+        <div class="section-label sl-beginner"><span class="sl-icon">🔰</span><span class="sl-text">初学者向け説明</span></div>
+        <div class="section-content">
+          <p>白黒のBモード画像の上に「血液の流れ」を色で<strong>塗り重ねる</strong>機能です。</p>
+          <div class="highlight-box">
+            🔴 <strong>赤</strong>：プローブに向かってくる血流（BART: Red Toward）<br>
+            🔵 <strong>青</strong>：プローブから遠ざかる血流（BART: Blue Away）<br>
+            🟢 <strong>緑混入</strong>：乱れた血流（赤→黄・青→シアン）
+          </div>
+          <p>逆流や狭窄を<strong>"一目で"</strong>見つけるための地図です。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-def"><span class="sl-icon">📖</span><span class="sl-text">定義</span></div>
+        <div class="section-content">
+          <p>ドプラ効果を利用してリアルタイムに血流情報（方向・平均流速・パワー・分散）を取得し、Bモード像上に<strong>カラーで重畳表示</strong>する方式。Color Flow Mapping（CFM）。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-mech"><span class="sl-icon">⚙️</span><span class="sl-text">メカニズム</span></div>
+        <div class="section-content">
+          <ul>
+            <li>同一ラインに対して複数回（十数回）パルスを送受信（<strong>マルチゲート</strong>）</li>
+            <li><strong>自己相関法</strong>で各点の平均流速・方向・乱れを算出</li>
+            <li>ライン単位で繋ぎ合わせて<strong>カラーマップ</strong>として表示</li>
+            <li>送受信回数が多い分、Bモード単体に比べて<strong>フレームレートが低下</strong>する</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-clinic"><span class="sl-icon">🏥</span><span class="sl-text">臨床的意義</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>弁逆流</strong>（AR・MR・TR）の部位・方向・程度の視覚的把握</li>
+            <li><strong>心内短絡</strong>（VSD・PDA）の検出</li>
+            <li>腹部血管・門脈血流の評価</li>
+            <li><strong>DVTスクリーニング</strong>：圧迫法と組み合わせて血流の有無を確認</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-related"><span class="sl-icon">🔍</span><span class="sl-text">関連概念・鑑別</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>パワーモードとの違い</strong>：CFMは「方向＋速さ」を色分けするが角度依存性が高い。パワーモードは「存在」のみで方向不明だが角度に強く感度が高い</li>
+            <li><strong>エイリアシング</strong>：高速血流でPRFの1/2（ナイキスト限界）を超えると色が反転（赤↔青）</li>
+            <li><strong>モザイクパターン</strong>：乱流（狭窄・逆流）で多色混在表示</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-caution"><span class="sl-icon">⚠️</span><span class="sl-text">注意点</span></div>
+        <div class="section-content">
+          <ul>
+            <li>ビームと血流が<strong>直交（90°）すると血流が映らない</strong>（ドプラシフト=0）</li>
+            <li>カラーゲインを上げすぎると<strong>ノイズが血流として表示</strong>される</li>
+            <li>フレームレートとカラー域の広さはトレードオフ。<strong>カラーボックスは小さく</strong>保つ</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- D4.15 -->
+  <div class="item-card" id="d415">
+    <div class="item-header" onclick="toggleCard(this.parentElement)">
+      <div class="item-title-group">
+        <span class="item-num">D4.15</span>
+        <div>
+          <div class="item-title">パワードプラ</div>
+          <div class="item-title-jp">Power Doppler / Power Flow Mapping</div>
+        </div>
+      </div>
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section-block">
+        <div class="section-label sl-beginner"><span class="sl-icon">🔰</span><span class="sl-text">初学者向け説明</span></div>
+        <div class="section-content">
+          <p>「血液が流れているかどうか」だけに特化した、<strong>超高感度センサー</strong>です。方向も速さもわからないけれど、ほんの少しでも流れがある場所を漏れなく<strong>オレンジ色</strong>で表示します。細い腫瘍内血管や非常にゆっくりした末梢血流を見つけるのが得意です。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-def"><span class="sl-icon">📖</span><span class="sl-text">定義</span></div>
+        <div class="section-content">
+          <p>ドプラシフトした信号の反射強度（パワー）の積分値を輝度・色で表示するモード。血流の「<strong>存在量</strong>」を強調し、<strong>方向・速度情報は持たない</strong>。「パワーフローマッピング」とも呼ばれる。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-mech"><span class="sl-icon">⚙️</span><span class="sl-text">メカニズム</span></div>
+        <div class="section-content">
+          <ul>
+            <li>血球からの散乱信号の<strong>パワー（強度の積分）</strong>を検出</li>
+            <li>十数回の<strong>加算平均処理</strong>でノイズを抑制しつつ微細信号を強調</li>
+            <li>角度依存性が極めて低い（<strong>90°でも血球による散乱シグナルが得られる</strong>）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-clinic"><span class="sl-icon">🏥</span><span class="sl-text">臨床的意義</span></div>
+        <div class="section-content">
+          <ul>
+            <li>腹部臓器（肝臓・腎臓・脾臓）実質の<strong>血流分布評価</strong></li>
+            <li>末梢血管、細小血管の走行描出</li>
+            <li>炎症・腫瘍における<strong>血流増生の評価</strong>（新生血管は低流速）</li>
+            <li>DVTスクリーニングの補完（特に遠位部・細い血管）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-related"><span class="sl-icon">🔍</span><span class="sl-text">関連概念・鑑別</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>CFM（流速モード）との比較</strong>：</li>
+          </ul>
+          <div class="highlight-box">
+            CFM：向きと速さ → 角度に弱い・エイリアシングあり・方向わかる<br>
+            パワードプラ：存在 → 角度に強い・エイリアシングなし・方向わからない
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-caution"><span class="sl-icon">⚠️</span><span class="sl-text">注意点</span></div>
+        <div class="section-content">
+          <ul>
+            <li>逆流の有無など<strong>「方向」が必要な評価には使えない</strong></li>
+            <li><strong>フラッシュアーティファクト</strong>：プローブや患者の動きを血流と誤検出しやすい</li>
+            <li>過剰ゲインで組織への色づき（<strong>ブルーミング</strong>）が起きる</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- D4.16 -->
+  <div class="item-card" id="d416">
+    <div class="item-header" onclick="toggleCard(this.parentElement)">
+      <div class="item-title-group">
+        <span class="item-num">D4.16</span>
+        <div>
+          <div class="item-title">スペクトラルドプラ</div>
+          <div class="item-title-jp">Spectral Doppler (PWD / CWD)</div>
+        </div>
+      </div>
+      <span class="toggle-icon">▾</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section-block">
+        <div class="section-label sl-beginner"><span class="sl-icon">🔰</span><span class="sl-text">初学者向け説明</span></div>
+        <div class="section-content">
+          <p>血流の「速度」を<strong>音楽の楽譜のように可視化</strong>する機能です。横軸が時間、縦軸が速度で、「この瞬間に◯cm/sで流れている血液がこれだけある」をリアルタイムで波形として描きます。速すぎる血流（狭窄）や逆流・異常な波形パターンを<strong>数値で定量評価</strong>できる精密検査ツールです。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-def"><span class="sl-icon">📖</span><span class="sl-text">定義</span></div>
+        <div class="section-content">
+          <p>ドプラ信号を<strong>高速フーリエ変換（FFT）</strong>で周波数解析し、時間軸に沿って速度（または周波数偏移）の分布をグラフ状に表示する方法。パルスドプラ法（PWD）および連続波ドプラ法（CWD）の出力形式として用いられる。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-mech"><span class="sl-icon">⚙️</span><span class="sl-text">メカニズム</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>FFT</strong>：複雑な反射波を周波数成分に分解し、各速度成分の強さをグラフ化</li>
+            <li><strong>パルスドプラ（PWD）</strong>：特定深度（サンプルボリューム）のみを解析。距離分解能あり。PRFの1/2（ナイキスト限界）を超えるとエイリアシングが発生</li>
+            <li><strong>連続波ドプラ（CWD）</strong>：送受信を連続して行い、ビーム上の全深度を積算。エイリアシングなし・高速血流計測可能だが距離分解能なし</li>
+          </ul>
+          <div class="highlight-box">
+            速度計算式：<code>v = (Δf × c) ÷ (2 × f₀ × cosθ)</code><br>
+            角度補正は必須（推奨 θ ≦ 60°）
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-clinic"><span class="sl-icon">🏥</span><span class="sl-text">臨床的意義</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>心臓弁膜症</strong>：大動脈弁狭窄のVmax・圧較差計算</li>
+            <li><strong>血管狭窄度の定量評価</strong>：PSV・EDV・RI・PI の算出</li>
+            <li>門脈血流パターン（肝硬変・門脈圧亢進）</li>
+            <li><strong>産科</strong>：臍帯・中大脳動脈血流評価</li>
+            <li>腎動脈狭窄スクリーニング</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-related"><span class="sl-icon">🔍</span><span class="sl-text">関連概念・鑑別</span></div>
+        <div class="section-content">
+          <ul>
+            <li><strong>PWD vs CWD</strong>：「場所の特定ができる/できない」「高速血流に弱い/強い」</li>
+            <li><strong>CFMとの連携</strong>：CFMで逆流・狭窄の「場所」を同定 → PWD/CWDで「速度の定量」</li>
+            <li><strong>Mモードとの違い</strong>：Mモードは「構造物の位置変化」、スペクトラルドプラは「血流速度の変化」を時間軸で追う</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-label sl-caution"><span class="sl-icon">⚠️</span><span class="sl-text">注意点</span></div>
+        <div class="section-content">
+          <ul>
+            <li>角度補正を怠ると<strong>速度を大幅に過小評価</strong>（cosθが小さくなる）</li>
+            <li>PWDでエイリアシングが出たら → <strong>PRFを上げる・ベースラインをシフト・CWDへ切替</strong></li>
+            <li>CWDは「ビーム上のどこの血流か不明」なため、複数構造が重なる場合に<strong>波形の帰属が困難</strong></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Claude Supplement -->
+  <div class="claude-supplement">
+    <h3><span>💡</span> Claude補足</h3>
+
+    <div class="supp-item">
+      <strong>① 音速の値について</strong><br>
+      資料では音速を「1,530 m/s」と記載していますが、一般的なPOCUS・超音波の教科書では生体軟部組織の平均音速は <strong>1,540 m/s</strong>（または1,538 m/s）が標準値として使われます。試験・臨床文書では1,540 m/sを用いるのが通例です。
+    </div>
+
+    <div class="supp-item">
+      <strong>② BARTの原則について</strong><br>
+      CFMの「赤＝近づく・青＝遠ざかる」は<strong>BARTの原則（Blue Away, Red Toward）</strong>として記憶するのが一般的ですが、カラーマップは装置設定で反転可能です。常にプローブとの位置関係を確認してから解釈してください。
+    </div>
+
+    <div class="supp-item">
+      <strong>③ ナイキスト限界（Nyquist limit）の補足</strong><br>
+      エイリアシング発生条件「PRFの1/2を超えると」という記述はナイキスト‐シャノンの標本化定理に基づきます。この「PRFの1/2」を<strong>ナイキスト限界</strong>と呼び、装置のカラースケール上限として表示されます。臨床ではエイリアシングが「狭窄の指標」として逆に有用なこともあります。
+    </div>
+
+    <div class="supp-item">
+      <strong>④ 組織ドプラ（TDI）について</strong><br>
+      スペクトラルドプラの応用として<strong>組織ドプラ（TDI: Tissue Doppler Imaging）</strong>があります。血流ではなく心筋の動きをドプラで計測するもので、e'速度の計測によるLV拡張能評価（E/e'比）に使われます。今後のチャプターで登場した際に関連づけて理解してください。
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-credit">
+      参考文献：Hoppmann et al. (2022). <em>Point-of-Care Ultrasound Curriculum</em>.<br>
+      本コンテンツは教育目的で作成されています。
+    </p>
+    <p class="footer-d4">D4.12 Bモード ／ D4.13 Mモード ／ D4.14 CFM ／ D4.15 パワードプラ ／ D4.16 スペクトラルドプラ</p>
+  </div>
+</footer>
+
+<script>
+function toggleCard(card) {
+  card.classList.toggle('open');
+}
+// All cards closed by default except first
+document.querySelectorAll('.item-card').forEach((card, i) => {
+  if (i !== 0) card.classList.remove('open');
+});
+</script>
+
+</body>
+</html>

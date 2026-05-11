@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch02 問題集｜POCUS-LOOP</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #2a3441;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --green: #39d353;
+    --yellow: #f0c419;
+    --red: #ff4757;
+    --blue: #58a6ff;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --beginner: #39d353;
+    --mid: #f0c419;
+    --adv: #ff6b35;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: rgba(22,27,34,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 20px;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-decoration: none;
+  }
+  .logo span { color: var(--text-muted); }
+  .back-link {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+  .back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #1a1228 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 20px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .chapter-badge {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.25);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent2), var(--yellow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+  }
+  .progress-bar-outer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .prog-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .prog-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--yellow));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .prog-count {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* ── Filter nav ── */
+  .filter-nav {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .filter-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent2); color: var(--text); background: rgba(255,107,53,0.08); }
+  .filter-btn[data-level="初級"].active { border-color: var(--beginner); color: var(--beginner); background: rgba(57,211,83,0.08); }
+  .filter-btn[data-level="中級"].active { border-color: var(--mid); color: var(--mid); background: rgba(240,196,25,0.08); }
+  .filter-btn[data-level="上級"].active { border-color: var(--adv); color: var(--adv); background: rgba(255,107,53,0.08); }
+
+  /* ── Main ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ── Question card ── */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s, opacity 0.2s;
+  }
+  .q-card.hidden { display: none; }
+  .q-card.answered { border-color: rgba(0,229,255,0.2); }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px 24px 18px;
+  }
+
+  .q-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+    align-items: flex-start;
+  }
+  .q-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+  .level-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .level-badge.初級 { background: rgba(57,211,83,0.15); color: var(--beginner); border: 1px solid rgba(57,211,83,0.3); }
+  .level-badge.中級 { background: rgba(240,196,25,0.15); color: var(--mid); border: 1px solid rgba(240,196,25,0.3); }
+  .level-badge.上級 { background: rgba(255,107,53,0.15); color: var(--adv); border: 1px solid rgba(255,107,53,0.3); }
+
+  .q-text {
+    font-size: 0.93rem;
+    line-height: 1.75;
+    flex: 1;
+    color: var(--text);
+    font-weight: 500;
+    padding-top: 2px;
+  }
+
+  /* ── Options ── */
+  .q-options {
+    padding: 0 24px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  @media (max-width: 640px) {
+    .q-options { grid-template-columns: 1fr; }
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text);
+    text-align: left;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(0,229,255,0.05);
+  }
+  .option-letter {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 1px;
+    min-width: 18px;
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: rgba(57,211,83,0.08);
+  }
+  .option-btn.correct .option-letter { color: var(--green); }
+  .option-btn.wrong {
+    border-color: var(--red);
+    background: rgba(255,71,87,0.08);
+    opacity: 0.7;
+  }
+  .option-btn.wrong .option-letter { color: var(--red); }
+  .option-btn:disabled { cursor: default; }
+
+  /* ── Answer reveal ── */
+  .answer-section {
+    display: none;
+    margin: 0 24px 22px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .answer-section.visible { display: block; }
+
+  .answer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    user-select: none;
+  }
+  .answer-toggle:hover { background: rgba(0,229,255,0.04); }
+  .toggle-arr { transition: transform 0.2s; }
+  .answer-section.expanded .toggle-arr { transform: rotate(180deg); }
+
+  .answer-body {
+    display: none;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .answer-section.expanded .answer-body { display: block; }
+
+  .correct-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .answer-body p {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: #c9d1d9;
+  }
+  .answer-body strong { color: var(--text); }
+  .answer-body ul { padding-left: 1.4em; margin-top: 6px; }
+  .answer-body li { font-size: 0.88rem; margin-bottom: 4px; }
+
+  /* ── Divider ── */
+  .q-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 24px;
+    opacity: 0.5;
+  }
+
+  /* ── Score summary ── */
+  .score-summary {
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(124,58,237,0.05));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 32px;
+    display: none;
+  }
+  .score-summary.visible { display: block; }
+  .score-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .score-label {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  /* ── Footer ── */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 32px 20px;
+    text-align: center;
+  }
+  .footer-inner { max-width: 900px; margin: 0 auto; }
+  .footer-credit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .footer-d4 {
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: #4a5568;
+  }
+  .study-link {
+    display: inline-block;
+    margin-top: 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+    border: 1px solid rgba(0,229,255,0.3);
+    padding: 8px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .study-link:hover { background: rgba(0,229,255,0.05); }
+
+  @media (max-width: 640px) {
+    .q-header { padding: 18px 18px 14px; }
+    .q-options { padding: 0 18px 18px; }
+    .answer-section { margin: 0 18px 18px; }
+    .q-divider { margin: 0 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="../index.html" class="logo">POCUS<span>—</span>LOOP</a>
+    <a href="../index.html" class="back-link">← 目次に戻る</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="chapter-badge">Chapter 02 — Quiz</div>
+    <h1>超音波モード<br><em>問題集</em></h1>
+    <p style="color:var(--text-muted); font-size:0.9rem;">D4.12〜D4.16 ／ 全16問 ／ 4択形式</p>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar-outer">
+    <span class="prog-label">PROGRESS</span>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <span class="prog-count" id="progCount">0 / 16</span>
+  </div>
+</div>
+
+<div class="filter-nav">
+  <button class="filter-btn active" data-level="all" onclick="filterQuiz('all', this)">すべて</button>
+  <button class="filter-btn" data-level="初級" onclick="filterQuiz('初級', this)">🟢 初級</button>
+  <button class="filter-btn" data-level="中級" onclick="filterQuiz('中級', this)">🟡 中級</button>
+  <button class="filter-btn" data-level="上級" onclick="filterQuiz('上級', this)">🟠 上級</button>
+</div>
+
+<main id="quizMain">
+
+  <div class="score-summary" id="scoreSummary">
+    <div class="score-big" id="scoreNum">—</div>
+    <div class="score-label" id="scoreLabel">問正解！</div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card" data-level="初級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q1</span><span class="level-badge 初級">初級</span></div>
+      <div class="q-text">Bモードにおいて、超音波画像上で「黒く（無エコー）」映る組織はどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>石灰化した胆石</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>肝臓の実質</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>膀胱内の尿</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>骨皮質</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — 膀胱内の尿</div>
+        <p>Bモードでは超音波の反射強度が輝度（明るさ）に変換される。液体（尿・胸水・腹腔内液など）は超音波をほぼ透過させるため反射がなく、<strong>無エコー（黒）</strong>として表示される。胆石・骨は強反射体で高輝度（白）を示し、後方音響陰影を生じる。肝実質は中等度エコーで灰色に映る。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" data-level="初級" data-answer="B">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q2</span><span class="level-badge 初級">初級</span></div>
+      <div class="q-text">Bモードの「B」が意味するものはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'B','A')"><span class="option-letter">A</span>Blood（血液）</button>
+      <button class="option-btn" onclick="answer(this,'B','B')"><span class="option-letter">B</span>Brightness（輝度）</button>
+      <button class="option-btn" onclick="answer(this,'B','C')"><span class="option-letter">C</span>Beam（ビーム）</button>
+      <button class="option-btn" onclick="answer(this,'B','D')"><span class="option-letter">D</span>Background（背景）</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：B — Brightness（輝度）</div>
+        <p>BモードのBは<strong>Brightness（輝度・明るさ）</strong>の略。超音波の反射振幅を輝点の明るさで表現することからこの名前がついた。これに対しAモードはAmplitude（振幅）、MモードはMotion（動き）を意味する。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card" data-level="初級" data-answer="B">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q3</span><span class="level-badge 初級">初級</span></div>
+      <div class="q-text">Mモードで縦軸・横軸が示すものの組み合わせとして正しいのはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'B','A')"><span class="option-letter">A</span>縦軸：時間　横軸：深さ</button>
+      <button class="option-btn" onclick="answer(this,'B','B')"><span class="option-letter">B</span>縦軸：深さ　横軸：時間</button>
+      <button class="option-btn" onclick="answer(this,'B','C')"><span class="option-letter">C</span>縦軸：速度　横軸：時間</button>
+      <button class="option-btn" onclick="answer(this,'B','D')"><span class="option-letter">D</span>縦軸：周波数　横軸：深さ</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：B — 縦軸：深さ　横軸：時間</div>
+        <p>Mモードは同一走査線上の輝度変化を時間軸に沿って記録する。<strong>縦軸が深さ（距離）、横軸が時間</strong>。これにより心臓弁の開閉運動や壁の動きの「振幅」「速度」「タイミング」を精密に評価できる。なお、スペクトラルドプラも横軸が時間だが、縦軸は速度（または周波数偏移）である点で異なる。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-card" data-level="初級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q4</span><span class="level-badge 初級">初級</span></div>
+      <div class="q-text">カラーフローマッピング（CFM）でプローブに向かって流れる血流は通常何色で表示されるか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>青</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>緑</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>赤</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>黄色</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — 赤</div>
+        <p><strong>BARTの原則</strong>：<strong>B</strong>lue <strong>A</strong>way（遠ざかる→青）、<strong>R</strong>ed <strong>T</strong>oward（近づく→赤）。ただし装置設定で反転できるため、スケールバーを確認することが重要。乱れた血流（分散）には緑が加わり、赤系は黄色、青系はシアンに変化する（モザイクパターン）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card" data-level="初級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q5</span><span class="level-badge 初級">初級</span></div>
+      <div class="q-text">パワードプラの最大の特徴はどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>血流の方向を正確に区別できる</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>高速血流の定量評価に優れる</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>低流速・細血管の検出感度が高い</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>角度依存性が大きい</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — 低流速・細血管の検出感度が高い</div>
+        <p>パワードプラはドプラ信号のパワー（反射強度）を表示するため、<strong>低流速・細血管でも感度よく描出できる</strong>。方向情報はなく（A誤り）、定量評価はスペクトラルドプラの役割（B誤り）、角度依存性は極めて少ない（D誤り）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card" data-level="中級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q6</span><span class="level-badge 中級">中級</span></div>
+      <div class="q-text">Bモードで深部が暗く見える場合、まず調整すべき機能はどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>カラーゲイン</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>PRF（パルス繰り返し周波数）</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>TGC（Time Gain Compensation）</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>サンプルボリューム</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — TGC（Time Gain Compensation）</div>
+        <p>生体内を伝播する超音波は深部ほど減衰する。<strong>TGC（STC：Sensitivity Time Control）</strong>は深度に応じて受信ゲインを補正する機能で、深部が暗い場合はTGCの深部側スライダーを上げることで均一な輝度が得られる。カラーゲインはカラードプラ専用（A誤り）、PRFはドプラのレンジ設定（B誤り）、サンプルボリュームはPWDのゲート位置（D誤り）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-card" data-level="中級" data-answer="B">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q7</span><span class="level-badge 中級">中級</span></div>
+      <div class="q-text">CFMにおけるエイリアシングが発生する条件として正しいのはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'B','A')"><span class="option-letter">A</span>血流速度がPRFの1/4を超えたとき</button>
+      <button class="option-btn" onclick="answer(this,'B','B')"><span class="option-letter">B</span>血流速度がPRFの1/2を超えたとき</button>
+      <button class="option-btn" onclick="answer(this,'B','C')"><span class="option-letter">C</span>ビームと血流の角度が0°に近づいたとき</button>
+      <button class="option-btn" onclick="answer(this,'B','D')"><span class="option-letter">D</span>カラーゲインを下げすぎたとき</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：B — 血流速度がPRFの1/2を超えたとき</div>
+        <p>ナイキスト‐シャノンの標本化定理により、<strong>PRFの1/2（ナイキスト限界）</strong>を超える血流速度は正しく計測できず、色が反対側に折り返して表示される（エイリアシング）。対策はPRFを上げる、ベースラインをシフトする、またはCWDに切り替えることである。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card" data-level="中級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q8</span><span class="level-badge 中級">中級</span></div>
+      <div class="q-text">パワードプラとCFM（流速モード）の比較として正しいのはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>パワードプラはCFMより角度依存性が高い</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>パワードプラは血流方向を赤・青で区別できる</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>パワードプラはCFMより低流速血流の検出に優れる</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>CFMはパワードプラよりエイリアシングが起きにくい</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — パワードプラはCFMより低流速血流の検出に優れる</div>
+        <p>パワードプラは信号パワーの加算平均処理により<strong>低流速血流の検出感度が高い</strong>。角度依存性はCFMより低く（A誤り）、方向情報はない（B誤り）。CFMは速度に基づくためエイリアシングが発生し、パワードプラではエイリアシングが生じない（D誤り）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-card" data-level="中級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q9</span><span class="level-badge 中級">中級</span></div>
+      <div class="q-text">パルスドプラ（PWD）と連続波ドプラ（CWD）の違いとして正しいのはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>PWDはCWDより高速血流の計測に適している</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>CWDはPWDより距離分解能が高い</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>PWDはサンプルボリュームで深度を指定できるが、CWDはできない</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>CWDはエイリアシングが発生しやすい</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — PWDはサンプルボリュームで深度を指定できるが、CWDはできない</div>
+        <p>PWDは特定深度（サンプルボリューム）からの信号のみを解析するため<strong>距離分解能がある</strong>。CWDは超音波を連続送受信するためビーム上の全深度が加算され、距離分解能はないが<strong>エイリアシングなしで高速血流（弁狭窄など）を計測できる</strong>。A・B・Dはいずれも逆の記述。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-card" data-level="中級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q10</span><span class="level-badge 中級">中級</span></div>
+      <div class="q-text">スペクトラルドプラで正確な血流速度を計測するために推奨されるビームと血流のなす角度はどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>90°以内</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>75°以内</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>60°以内</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>30°以内</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — 60°以内</div>
+        <p>ドプラ速度式 <strong>v = Δf·c ÷ (2·f₀·cosθ)</strong> において、θが90°に近づくとcosθ→0となり速度が過小評価される。<strong>60°を超えると誤差が急増</strong>するため、60°以内の入射角が推奨されている。理想は45°以内だが、臨床的に許容される上限が60°とされる。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-card" data-level="中級" data-answer="B">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q11</span><span class="level-badge 中級">中級</span></div>
+      <div class="q-text">CFMでカラーボックス（関心領域）を小さく保つべき主な理由はどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'B','A')"><span class="option-letter">A</span>エイリアシングを防ぐため</button>
+      <button class="option-btn" onclick="answer(this,'B','B')"><span class="option-letter">B</span>フレームレートを維持するため</button>
+      <button class="option-btn" onclick="answer(this,'B','C')"><span class="option-letter">C</span>角度依存性を下げるため</button>
+      <button class="option-btn" onclick="answer(this,'B','D')"><span class="option-letter">D</span>ノイズを減らすため</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：B — フレームレートを維持するため</div>
+        <p>CFMは同一ラインに対して十数回の送受信を行うため、カラーボックスが大きいほど処理すべきライン数が増え、<strong>フレームレート（画像更新速度）が低下</strong>する。特に心臓のような高速運動臓器では動きを追いきれなくなる。カラーボックスをできる限り小さく保つことがフレームレート維持の基本的な対策である。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" data-level="上級" data-answer="C">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q12</span><span class="level-badge 上級">上級</span></div>
+      <div class="q-text">CFMで「モザイクパターン」が観察される臨床的意義として最も適切なのはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'C','A')"><span class="option-letter">A</span>非常に遅い血流が存在することを示す</button>
+      <button class="option-btn" onclick="answer(this,'C','B')"><span class="option-letter">B</span>ビームと血流が直交していることを示す</button>
+      <button class="option-btn" onclick="answer(this,'C','C')"><span class="option-letter">C</span>高速で乱れた血流（狭窄・逆流など）が存在することを示す</button>
+      <button class="option-btn" onclick="answer(this,'C','D')"><span class="option-letter">D</span>カラーゲインが低すぎることを示す</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：C — 高速で乱れた血流（狭窄・逆流など）が存在することを示す</div>
+        <p>モザイクパターンは赤・青・緑・黄・シアンなどの色が混在した像で、<strong>速く乱れた血流</strong>（高速＋高分散）を反映する。弁逆流、弁狭窄、心内短絡（VSD）などで典型的に出現し、逆流ジェットの位置・方向・広がりの視覚的指標となる。遅い血流では単色のカラーで表示される（A誤り）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card" data-level="上級" data-answer="D">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q13</span><span class="level-badge 上級">上級</span></div>
+      <div class="q-text">大動脈弁狭窄症が疑われる患者で、最大血流速度を正確に計測したい。胸骨上窩アプローチで血流速度が5 m/s以上が予想される場合、最も適切なドプラモードはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'D','A')"><span class="option-letter">A</span>CFM（カラーフローマッピング）</button>
+      <button class="option-btn" onclick="answer(this,'D','B')"><span class="option-letter">B</span>パワードプラ</button>
+      <button class="option-btn" onclick="answer(this,'D','C')"><span class="option-letter">C</span>パルスドプラ（PWD）</button>
+      <button class="option-btn" onclick="answer(this,'D','D')"><span class="option-letter">D</span>連続波ドプラ（CWD）</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：D — 連続波ドプラ（CWD）</div>
+        <p>大動脈弁狭窄の最大血流速度は4〜6 m/s以上になることがあり、これはPWDのナイキスト限界（通常1〜2 m/s程度）を大きく超える。このような<strong>高速血流の定量計測にはCWD</strong>が適している。CWDはエイリアシングなしで高速血流を計測できる。実践的なワークフローとしては、CFMで弁口部を確認し角度を合わせてからCWDを施行する。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-card" data-level="上級" data-answer="B">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q14</span><span class="level-badge 上級">上級</span></div>
+      <div class="q-text">IVC（下大静脈）の呼吸性虚脱率（Caval Index）を評価するために最も適したモードはどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'B','A')"><span class="option-letter">A</span>CFM（カラーフローマッピング）</button>
+      <button class="option-btn" onclick="answer(this,'B','B')"><span class="option-letter">B</span>Mモード</button>
+      <button class="option-btn" onclick="answer(this,'B','C')"><span class="option-letter">C</span>パワードプラ</button>
+      <button class="option-btn" onclick="answer(this,'B','D')"><span class="option-letter">D</span>連続波ドプラ（CWD）</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：B — Mモード</div>
+        <p>IVCの呼吸性虚脱率（caval index）はIVCの最大径と最小径から算出する。<strong>Mモード</strong>を肝静脈合流部直下のIVCに当てると、呼吸に同期した径の変化が精密に記録・計測できる。IVC径2.1cm以下＋50%以上の虚脱で右房圧低下（≤5 mmHg）と推定される。CFMは血流の方向確認に使うが、径の計測には不向き。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="q-card" data-level="上級" data-answer="B">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q15</span><span class="level-badge 上級">上級</span></div>
+      <div class="q-text">パワードプラで「フラッシュアーティファクト」が発生する主な原因はどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'B','A')"><span class="option-letter">A</span>血流速度がナイキスト限界を超えた</button>
+      <button class="option-btn" onclick="answer(this,'B','B')"><span class="option-letter">B</span>プローブや患者の動きによる組織の動きを血流と誤検出した</button>
+      <button class="option-btn" onclick="answer(this,'B','C')"><span class="option-letter">C</span>カラーゲインが低すぎた</button>
+      <button class="option-btn" onclick="answer(this,'B','D')"><span class="option-letter">D</span>サンプルボリュームがビーム上にない</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：B — プローブや患者の動きによる組織の動きを血流と誤検出した</div>
+        <p><strong>フラッシュアーティファクト（フラッシュノイズ）</strong>はパワードプラに特有の問題で、<strong>患者やプローブの急激な動き</strong>によって組織自体が動き、ドプラシフトが発生することで、あたかも広範囲に血流があるように表示される現象。ナイキスト限界超過はエイリアシング（A誤り）、低ゲインは信号欠損（C誤り）の原因。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="q-card" data-level="上級" data-answer="A">
+    <div class="q-header">
+      <div class="q-meta"><span class="q-num">Q16</span><span class="level-badge 上級">上級</span></div>
+      <div class="q-text">スペクトラルドプラ波形でRI（抵抗指数）を計算する正しい式はどれか。</div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-options">
+      <button class="option-btn" onclick="answer(this,'A','A')"><span class="option-letter">A</span>(PSV − EDV) ÷ PSV</button>
+      <button class="option-btn" onclick="answer(this,'A','B')"><span class="option-letter">B</span>PSV ÷ EDV</button>
+      <button class="option-btn" onclick="answer(this,'A','C')"><span class="option-letter">C</span>(PSV + EDV) ÷ 2</button>
+      <button class="option-btn" onclick="answer(this,'A','D')"><span class="option-letter">D</span>EDV ÷ PSV</button>
+    </div>
+    <div class="answer-section">
+      <div class="answer-toggle" onclick="toggleAnswer(this.parentElement)">解説を見る <span class="toggle-arr">▾</span></div>
+      <div class="answer-body">
+        <div class="correct-label">✓ 正解：A — (PSV − EDV) ÷ PSV</div>
+        <p><strong>RI（Resistive Index）= (PSV − EDV) ÷ PSV</strong>（PSV：収縮期最高速度、EDV：拡張末期速度）。RIは0〜1の値をとり、高値ほど末梢血管抵抗が高いことを意味する（例：腎動脈RI &gt; 0.7で腎血管障害疑い）。B式はS/D比（Systolic/Diastolic ratio）、C式は平均流速の近似式。</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 32px; text-align: center;">
+    <a href="../input/ch02_input.html" class="study-link">← 解説ページに戻る</a>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-credit">
+      参考文献：Hoppmann et al. (2022). <em>Point-of-Care Ultrasound Curriculum</em>.<br>
+      本コンテンツは教育目的で作成されています。
+    </p>
+    <p class="footer-d4">D4.12 Bモード ／ D4.13 Mモード ／ D4.14 CFM ／ D4.15 パワードプラ ／ D4.16 スペクトラルドプラ</p>
+  </div>
+</footer>
+
+<script>
+const TOTAL = 16;
+let answered = 0;
+let correct = 0;
+
+function answer(btn, correctKey, chosen) {
+  const card = btn.closest('.q-card');
+  if (card.classList.contains('answered')) return;
+
+  card.classList.add('answered');
+  const buttons = card.querySelectorAll('.option-btn');
+  buttons.forEach(b => {
+    b.disabled = true;
+    const letter = b.querySelector('.option-letter').textContent;
+    if (letter === correctKey) b.classList.add('correct');
+    else if (letter === chosen && chosen !== correctKey) b.classList.add('wrong');
+  });
+
+  const ansSection = card.querySelector('.answer-section');
+  ansSection.classList.add('visible', 'expanded');
+
+  answered++;
+  if (chosen === correctKey) correct++;
+  updateProgress();
+}
+
+function toggleAnswer(section) {
+  section.classList.toggle('expanded');
+}
+
+function updateProgress() {
+  const pct = (answered / TOTAL) * 100;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progCount').textContent = answered + ' / ' + TOTAL;
+
+  if (answered === TOTAL) {
+    const summary = document.getElementById('scoreSummary');
+    summary.classList.add('visible');
+    document.getElementById('scoreNum').textContent = correct + ' / ' + TOTAL;
+    const pctScore = Math.round((correct / TOTAL) * 100);
+    document.getElementById('scoreLabel').textContent = `正解（${pctScore}%）`;
+    summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function filterQuiz(level, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.q-card').forEach(card => {
+    if (level === 'all' || card.dataset.level === level) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+</script>
+
+</body>
+</html>
