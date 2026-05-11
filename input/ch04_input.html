@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch04 プローブの種類 | POCUS—LOOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f5f4f0;
+    --surface:   #ffffff;
+    --surface2:  #eef3f9;
+    --accent:    #1a56a0;
+    --accent2:   #e8500a;
+    --text:      #1c1c1e;
+    --muted:     #6b7280;
+    --border:    #d4d4d4;
+    --radius:    12px;
+    --shadow:    0 2px 12px rgba(0,0,0,.08);
+    /* badge colors */
+    --c-init:    #0f766e;
+    --c-init-bg: #f0fdf4;
+    --c-def:     #1d4ed8;
+    --c-def-bg:  #eff6ff;
+    --c-mech:    #7c3aed;
+    --c-mech-bg: #f5f3ff;
+    --c-clin:    #b45309;
+    --c-clin-bg: #fffbeb;
+    --c-rel:     #0e7490;
+    --c-rel-bg:  #ecfeff;
+    --c-warn:    #dc2626;
+    --c-warn-bg: #fff1f2;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 15px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.35rem;
+    letter-spacing: .04em;
+    color: #fff;
+    text-decoration: none;
+  }
+  .logo span { color: #90c4ff; }
+  .back-link {
+    font-size: .8rem;
+    color: #c8ddf5;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color .2s;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1a56a0 0%, #0d3a70 60%, #081e3f 100%);
+    color: #fff;
+    padding: 48px 20px 36px;
+    text-align: center;
+  }
+  .hero-chapter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .15em;
+    color: #90c4ff;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .hero-range {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: .8rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: .08em;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 32px 16px 64px;
+  }
+
+  /* ── ITEM CARD ── */
+  .item-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    cursor: pointer;
+    gap: 12px;
+    transition: background .2s;
+    user-select: none;
+  }
+  .item-header:hover { background: #f8faff; }
+
+  .item-title-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .d4-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    padding: 3px 9px;
+    white-space: nowrap;
+  }
+
+  .item-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .toggle-icon {
+    font-size: 1.1rem;
+    color: var(--muted);
+    transition: transform .3s;
+    flex-shrink: 0;
+  }
+  .item-card.open .toggle-icon { transform: rotate(180deg); }
+
+  /* ── ACCORDION BODY ── */
+  .item-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .item-card.open .item-body { display: block; }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 18px 22px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 5px;
+    padding: 3px 10px;
+    margin-bottom: 10px;
+  }
+
+  .section-init   { color: var(--c-init);  background: var(--c-init-bg);  }
+  .section-def    { color: var(--c-def);   background: var(--c-def-bg);   }
+  .section-mech   { color: var(--c-mech);  background: var(--c-mech-bg);  }
+  .section-clin   { color: var(--c-clin);  background: var(--c-clin-bg);  }
+  .section-rel    { color: var(--c-rel);   background: var(--c-rel-bg);   }
+  .section-warn   { color: var(--c-warn);  background: var(--c-warn-bg);  }
+
+  .section p, .section ul, .section ol { font-size: .93rem; }
+  .section ul, .section ol { padding-left: 1.4em; }
+  .section li { margin-bottom: 4px; }
+  .section strong { color: var(--text); }
+
+  /* analogy box */
+  .analogy-box {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-left: 4px solid #0ea5e9;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: .9rem;
+    color: #0c4a6e;
+    font-style: italic;
+  }
+
+  /* highlight pill */
+  .pill {
+    display: inline-block;
+    background: var(--surface2);
+    border-radius: 20px;
+    padding: 1px 10px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 2px 2px;
+  }
+
+  /* compare table */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+    margin-top: 8px;
+  }
+  .compare-table th {
+    background: var(--surface2);
+    padding: 7px 10px;
+    text-align: left;
+    font-weight: 700;
+    border-bottom: 2px solid var(--border);
+  }
+  .compare-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: #fafafa; }
+
+  /* ── SUPPLEMENT ── */
+  .supplement {
+    background: linear-gradient(135deg, #fff7ed 0%, #fffbf0 100%);
+    border: 1px solid #fed7aa;
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    margin-top: 10px;
+  }
+  .supplement-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #c2410c;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .supplement p, .supplement ul { font-size: .9rem; }
+  .supplement ul { padding-left: 1.4em; }
+  .supplement li { margin-bottom: 6px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #1c1c1e;
+    color: #9ca3af;
+    text-align: center;
+    padding: 28px 16px;
+    font-size: .78rem;
+    line-height: 1.9;
+  }
+  footer a { color: #60a5fa; text-decoration: none; }
+
+  /* ── OPEN ALL BTN ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .ctrl-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: .82rem;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 600;
+    transition: all .2s;
+  }
+  .ctrl-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* chapter nav */
+  .chapter-pill {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .chapter-pill span {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 20px;
+    padding: 4px 18px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+  }
+
+  @media (max-width: 600px) {
+    .item-header { padding: 14px 16px; }
+    .section { padding: 14px 16px; }
+    .supplement { padding: 16px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="../index.html">POCUS<span>—</span>LOOP</a>
+  <a class="back-link" href="../index.html">← 目次に戻る</a>
+</header>
+
+<div class="hero">
+  <div class="hero-chapter">Chapter 04</div>
+  <h1>プローブの種類</h1>
+  <div class="hero-range">D4.21 — D4.24</div>
+</div>
+
+<main>
+  <div class="chapter-pill"><span>解説ページ｜STEP A</span></div>
+
+  <div class="controls">
+    <button class="ctrl-btn" onclick="toggleAll(true)">▼ すべて開く</button>
+    <button class="ctrl-btn" onclick="toggleAll(false)">▲ すべて閉じる</button>
+  </div>
+
+  <!-- ══════════════════════════════
+       D4.21 リニア型プローブ
+  ══════════════════════════════ -->
+  <div class="item-card" id="d4-21">
+    <div class="item-header" onclick="toggleCard(this)">
+      <div class="item-title-group">
+        <span class="d4-badge">D4.21</span>
+        <span class="item-title">リニア型プローブ（Linear Probe）</span>
+      </div>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section">
+        <div class="section-label section-init">🔰 初学者向け説明</div>
+        <div class="analogy-box">
+          定規のように真っ直ぐな「棒」を肌に当てるイメージです。高性能なカメラのマクロレンズのように、<strong>「浅いところを超高精細に」</strong>映し出します。皮膚のすぐ下にある血管・腱・神経は、このプローブがないと見えないほど細かい構造です。逆に、お腹の深い臓器はかえって見えません。
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-def">📖 定義</div>
+        <p>振動子（素子）が<strong>直線状に配列</strong>された電子スキャン式プローブ。素子群を電子スイッチで順次切り替えながら走査し、<strong>長方形（矩形）の画像</strong>を生成する。使用周波数は概ね <span class="pill">4.0–10.0 MHz</span>。</p>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-mech">⚙️ メカニズム</div>
+        <ul>
+          <li>128個程度の素子を直線上に並べ、一定数の素子群を電子スイッチで切り替えながら「ずらして」走査する（電子スキャン）。</li>
+          <li>周波数が高いほど波長が短く→空間分解能が向上するが、組織での減衰も大きく→深達度が低下する。</li>
+          <li><strong>ビームステアリング（オブリークスキャン）</strong>：電気的にビームを斜めに射出する機能。プローブを傾けずに血管壁への入射角を調整でき、分解能向上・穿刺針の視認性改善に役立つ。</li>
+          <li>サイドローブアーチファクトは画像の<strong>左右端が下がる</strong>方向に発生する。</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-clin">🏥 臨床的意義</div>
+        <ul>
+          <li><strong>血管</strong>：頸動脈、末梢静脈の血栓・走行評価、CV挿入ガイド</li>
+          <li><strong>運動器</strong>：腱・靭帯・筋肉の炎症・断裂評価</li>
+          <li><strong>神経</strong>：末梢神経ブロックのガイド</li>
+          <li><strong>肺</strong>：胸膜ライン（pleural sliding）の精密評価に第一選択</li>
+          <li><strong>小児</strong>：骨折評価（骨膜が薄く高分解能が必要）</li>
+          <li><strong>虫垂炎</strong>：回盲部・虫垂の直接描出</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-rel">🔍 関連概念・鑑別</div>
+        <table class="compare-table">
+          <tr><th>項目</th><th>リニア</th><th>コンベックス</th><th>セクタ</th></tr>
+          <tr><td>画像形状</td><td>長方形</td><td>扇形（円弧）</td><td>扇形（鋭角）</td></tr>
+          <tr><td>周波数</td><td>高（4–10 MHz）</td><td>中（1.8–6.4 MHz）</td><td>低（1.5–6 MHz）</td></tr>
+          <tr><td>分解能</td><td>◎ 高い</td><td>△ 中</td><td>△ 中〜低</td></tr>
+          <tr><td>深達度</td><td>浅部のみ</td><td>深部◎</td><td>深部◎</td></tr>
+          <tr><td>主な用途</td><td>血管・筋骨格</td><td>腹部臓器</td><td>心臓・肺</td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-warn">⚠️ 注意点</div>
+        <ul>
+          <li>高周波数ゆえ<strong>深部（5 cm 超）では減衰</strong>が大きく、腹部臓器の描出には不適。</li>
+          <li>ビームステアリングを使いすぎると入射角が大きくなり、側方分解能が低下する場合がある。</li>
+          <li>肺エコーでの<strong>B-line</strong>カウントは、リニアでもコンベックスでも可能だが、胸膜評価（スライディング確認）はリニアが優位。</li>
+        </ul>
+      </div>
+
+    </div>
+  </div><!-- /D4.21 -->
+
+
+  <!-- ══════════════════════════════
+       D4.22 コンベックスプローブ
+  ══════════════════════════════ -->
+  <div class="item-card" id="d4-22">
+    <div class="item-header" onclick="toggleCard(this)">
+      <div class="item-title-group">
+        <span class="d4-badge">D4.22</span>
+        <span class="item-title">カーブドアレイ / コンベックスプローブ（Convex Probe）</span>
+      </div>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section">
+        <div class="section-label section-init">🔰 初学者向け説明</div>
+        <div class="analogy-box">
+          魚眼レンズのカメラで広い部屋を撮るようなイメージです。先端が「弓なりにカーブ」しているため、<strong>深く・広い範囲を扇状</strong>に映し出せます。腹部エコーといえば「このプローブ」という、まさにオールラウンダーです。
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-def">📖 定義</div>
+        <p>振動子が<strong>凸状（円弧状）に配列</strong>された電子スキャン式プローブ。リニアと同様に素子群を順次切り替えて走査するが、配列の曲率により<strong>扇形の広い視野</strong>が得られる。使用周波数は <span class="pill">1.8–6.4 MHz</span>。</p>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-mech">⚙️ メカニズム</div>
+        <ul>
+          <li>凸状配列のため、走査ラインが末梢に向かって放射状に広がり→扇形（上部が広い）の画像になる。</li>
+          <li>低周波数で減衰が少なく→深部（15 cm 超）まで音波が届く。</li>
+          <li>音響レンズによる<strong>フォーカス機能</strong>を備え（例：3.75 MHz で約 6 cm に設定）、指定深度での横断分解能を向上できる。</li>
+          <li><strong>マイクロコンベックスプローブ</strong>：先端の曲率半径をより小さくしたもの。接触面積が小さいため、肋間・小児・体位困難症例での使用に有利。</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-clin">🏥 臨床的意義</div>
+        <ul>
+          <li><strong>腹部臓器全般</strong>：肝・胆嚢・膵・脾・腎の形態・内部エコー評価</li>
+          <li><strong>産婦人科</strong>：経腹アプローチでの妊娠評価・子宮・卵巣</li>
+          <li><strong>心窩部（subcostal）アプローチ</strong>での心臓観察</li>
+          <li><strong>深部神経ブロック</strong>（腰椎穿刺ガイド等）</li>
+          <li><strong>マイクロコンベックス</strong>：肋間からの肺・胸膜・心臓観察、FAST・RUSH プロトコルでの使用</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-rel">🔍 関連概念・鑑別</div>
+        <ul>
+          <li><strong>vs リニア</strong>：分解能は劣るが深達度は大きく上回る。腹部の深い臓器はコンベックス一択。</li>
+          <li><strong>vs セクタ</strong>：どちらも扇形画像だが、コンベックスは上部が円弧状（広い）、セクタは点状（鋭い三角形）。プローブ接触面のサイズも大きく異なる。</li>
+          <li><strong>マイクロコンベックス vs セクタ</strong>：どちらも小さい接触面を持つが、マイクロコンベックスは電子スキャン（コンベックスと同じ原理）、セクタはフェーズドアレイ方式（全素子同時駆動）。</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-warn">⚠️ 注意点</div>
+        <ul>
+          <li>周波数が低いため、浅部の分解能はリニアより<strong>大幅に劣る</strong>。皮下組織の精密評価や血管穿刺ガイドにはリニアを使うこと。</li>
+          <li>曲率によりサイドローブアーチファクトの出方が変化するため、画像端の構造物は偽像に注意。</li>
+          <li>マイクロコンベックスはコンベックスと同じ走査原理だが、より<strong>小さな視野（近距離）</strong>に特化している点に留意。</li>
+        </ul>
+      </div>
+
+    </div>
+  </div><!-- /D4.22 -->
+
+
+  <!-- ══════════════════════════════
+       D4.23 フェーズドアレイ（セクタ）
+  ══════════════════════════════ -->
+  <div class="item-card" id="d4-23">
+    <div class="item-header" onclick="toggleCard(this)">
+      <div class="item-title-group">
+        <span class="d4-badge">D4.23</span>
+        <span class="item-title">フェーズドアレイ / セクタプローブ（Phased Array / Sector Probe）</span>
+      </div>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section">
+        <div class="section-label section-init">🔰 初学者向け説明</div>
+        <div class="analogy-box">
+          「骨の隙間から懐中電灯を差し込む」イメージです。プローブの先端が<strong>非常に小さい</strong>ため、肋骨と肋骨のわずかな隙間（肋間腔）に置いて、そこから扇状に音波を広げます。心臓のように骨に囲まれた臓器をのぞくための、まさに「秘密の扉」です。
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-def">📖 定義</div>
+        <p><strong>フェーズドアレイ方式</strong>（位相制御配列）を採用した電子スキャン式プローブ。64〜128個程度の素子を<strong>全て同時に駆動</strong>し、各素子への電圧印加タイミング（遅延時間）を微細にずらすことでビームの<strong>偏向（steering）と収束（focusing）</strong>を電気的に制御する。使用周波数は <span class="pill">1.5–6.0 MHz</span>、画像形状は<strong>先端が点状の扇形（鋭角三角形）</strong>。</p>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-mech">⚙️ メカニズム</div>
+        <ul>
+          <li><strong>遅延時間の制御</strong>：各素子の発火タイミングをずらすことで、合成された波面（ビーム）を任意の方向に「曲げる」ことができる（ビーム偏向）。</li>
+          <li>焦点制御も遅延パターンで行う：中央の素子を遅らせると波面が凹状に収束→指定深度でのフォーカス。</li>
+          <li><strong>グレーティングローブ</strong>：素子間隔が波長の1/2を超えると発生する不要なビーム。これによる虚像（偽像）がセクタプローブ特有の問題。抑制には素子間隔を狭める（周波数を上げる）必要があるが、現状10 MHz 程度が限界。</li>
+          <li>プローブ先端が小さいため、接触面積が狭くても扇状に広い視野を確保できる。</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-clin">🏥 臨床的意義</div>
+        <ul>
+          <li><strong>心臓エコー</strong>：胸骨傍・心尖部・肋骨下・胸骨上切痕の全ての標準断面に対応。循環器エコーのメインプローブ。</li>
+          <li><strong>肺エコー</strong>：胸膜・B-line の評価にも使用可能（肋間腔への挿入のしやすさが利点）。</li>
+          <li><strong>POCUS でのショック評価</strong>（RUSH プロトコル等）でも主要プローブとして使用。</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-rel">🔍 関連概念・鑑別</div>
+        <ul>
+          <li><strong>vs コンベックス</strong>：どちらも扇形だが、セクタは画像の「頂点が点」で接触面が非常に小さい。コンベックスは接触面が広く「頂点が弧」。</li>
+          <li><strong>フェーズドアレイ vs リニア / コンベックス（電子スキャン）の走査原理の違い</strong>：リニア・コンベックスは「素子群をずらして」走査（スイッチ切替方式）。セクタは「全素子同時に、タイミングをずらして」走査（位相制御方式）。根本的に異なる。</li>
+          <li><strong>グレーティングローブ vs サイドローブ</strong>：グレーティングローブはフェーズドアレイ固有。サイドローブは全プローブに共通して発生する。</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-warn">⚠️ 注意点</div>
+        <ul>
+          <li><strong>グレーティングローブによる虚像</strong>に注意：特に心内の強エコー構造（弁・ペースメーカーリード等）の近傍で偽像が生じやすい。</li>
+          <li>低周波数のため、浅部の分解能はリニアより大幅に劣る。</li>
+          <li>プローブマーカーは側面の<strong>凹凸（物理的な突起）</strong>として確認する（画面上のマーカーと一致させること）。</li>
+        </ul>
+      </div>
+
+    </div>
+  </div><!-- /D4.23 -->
+
+
+  <!-- ══════════════════════════════
+       D4.24 経腟用プローブ
+  ══════════════════════════════ -->
+  <div class="item-card" id="d4-24">
+    <div class="item-header" onclick="toggleCard(this)">
+      <div class="item-title-group">
+        <span class="d4-badge">D4.24</span>
+        <span class="item-title">経腟用プローブ（Transvaginal Probe）</span>
+      </div>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="item-body">
+
+      <div class="section">
+        <div class="section-label section-init">🔰 初学者向け説明</div>
+        <div class="analogy-box">
+          「外からではなく、中から近くで見る」アプローチです。体の外から腹部越しに見ると、距離が遠くて画像が粗くなります。経腟プローブを使えば、目標（子宮・卵巣・胎嚢）のすぐそばまで近づけるため、<strong>格段に細かく</strong>観察できます。ただし体内に入れるプローブなので、<strong>衛生管理が特に重要</strong>です。
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-def">📖 定義</div>
+        <p>腟内に挿入して使用する<strong>体腔内プローブ</strong>。女性生殖器（子宮・卵巣）および初期妊娠（胎嚢・胎児心拍の早期確認）の精密評価に特化。プローブ先端に振動子を配置し、体内から至近距離で対象を観察するため、<strong>経腹アプローチより高い空間分解能</strong>が得られる。機械式走査（ラジアル走査：振動子回転式）を採用するタイプも存在する。</p>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-mech">⚙️ メカニズム</div>
+        <ul>
+          <li>対象物との距離が短い→音波の減衰が少ない→高周波数（一般的に5–9 MHz）を使用可能→分解能が向上。</li>
+          <li>ラジアル走査（機械式）：先端の振動子を物理的に回転させ、放射状に360°または扇状にスキャンする。</li>
+          <li>電子スキャン（コンベックス型先端）を採用するタイプもあり、画像は扇形になる。</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-clin">🏥 臨床的意義</div>
+        <ul>
+          <li><strong>初期妊娠</strong>：胎嚢（GS）の確認、胎児心拍の早期検出（経腹で見えない5〜6週頃から確認可能）</li>
+          <li><strong>異所性妊娠（子宮外妊娠）の除外</strong>：救急 POCUS において最重要評価の一つ</li>
+          <li><strong>卵巣病変</strong>（卵巣嚢腫・OHSS・卵巣捻転の疑い）の評価</li>
+          <li><strong>子宮内膜</strong>の厚さ・性状評価</li>
+          <li>経腹で骨盤内が十分に描出できない場合の「延長手段」として POCUS においても重要</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-rel">🔍 関連概念・鑑別</div>
+        <ul>
+          <li><strong>経腹 vs 経腟</strong>：経腹はコンベックスプローブで低周波数・遠距離観察。経腟は近距離・高周波数で高精細。膀胱充満が経腹では必要だが経腟では不要（空の方が観察しやすいことも）。</li>
+          <li><strong>Spaulding 分類</strong>：粘膜に接触する器具は「セミクリティカル」に分類され、高水準消毒が必要。（クリティカル = 滅菌、ノンクリティカル = 低水準消毒）</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <div class="section-label section-warn">⚠️ 注意点</div>
+        <ul>
+          <li><strong>感染管理（最重要）</strong>：使用ごとに専用プローブカバー（コンドーム型シース）を装着し、使用後は高水準消毒（グルタラール等）または滅菌が必要。Spaulding 分類の「セミクリティカル」器材。</li>
+          <li><strong>漏れ電流（リーク電流）</strong>：体腔内に挿入するため、電気的絶縁不良による感電リスクが通常の体表プローブより高い。定期的な電気安全検査が必須。</li>
+          <li><strong>挿入時の組織損傷リスク</strong>：力の入れすぎや不適切な操作による損傷を防ぐため、適切なトレーニングと丁寧な操作が不可欠。</li>
+          <li>インフォームドコンセントおよびプライバシーへの十分な配慮が必要。</li>
+        </ul>
+      </div>
+
+    </div>
+  </div><!-- /D4.24 -->
+
+
+  <!-- ══════════════════════════════
+       Claude補足
+  ══════════════════════════════ -->
+  <div class="supplement">
+    <div class="supplement-title">💡 Claude 補足</div>
+    <ul>
+      <li><strong>走査原理の整理</strong>：NotebookLM の解説では「リニア・コンベックスはスイッチ切替で素子群をずらす」「セクタは全素子同時に遅延時間を変えて制御する」という区別が含まれており、これは正確です。この違いは画像形状だけでなく、アーチファクトの種類（サイドローブ vs グレーティングローブ）にも直結するため、しっかり押さえてください。</li>
+      <li><strong>マイクロコンベックスとセクタの混同注意</strong>：どちらも小さな接触面を持ちますが、走査原理が異なります（電子スキャン vs フェーズドアレイ）。POCUS では携帯型機器でマイクロコンベックスが搭載されているものも多く、混同しやすいです。</li>
+      <li><strong>経腟プローブの Spaulding 分類</strong>：資料中の「セミクリティカル＝中水準〜高水準消毒」という記述について補足。現行の多くのガイドライン（WHO・AIUM 等）では、体腔内プローブ（経腟・経直腸）に対して<strong>高水準消毒を推奨</strong>しており、中水準では不十分とされる傾向があります。施設のプロトコルに従い、最低でも高水準消毒を実施してください。</li>
+      <li><strong>周波数の記載について</strong>：資料中の周波数範囲は機種・メーカーによって異なります。試験対策上は「リニア＝高周波（7.5〜15 MHz も含む）」「コンベックス・セクタ＝低周波（2〜5 MHz 前後）」として覚えると実用的です。</li>
+      <li><strong>補足なし</strong>の項目：NotebookLM の出力に不正確な記述は見当たりません。上記は重要な追加情報・注意喚起です。</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer>
+  <p>POCUS—LOOP 学習プラットフォーム</p>
+  <p>参考文献：Hoppmann et al. (2022) <em>Point-of-Care Ultrasound</em></p>
+  <p>D4.21–D4.24：プローブの種類（Linear / Convex / Phased Array / Transvaginal）</p>
+  <p style="margin-top:8px"><a href="../index.html">← 目次に戻る</a></p>
+</footer>
+
+<script>
+function toggleCard(header) {
+  const card = header.closest('.item-card');
+  card.classList.toggle('open');
+}
+function toggleAll(open) {
+  document.querySelectorAll('.item-card').forEach(c => {
+    if (open) c.classList.add('open');
+    else c.classList.remove('open');
+  });
+}
+// Smooth scroll to hash
+window.addEventListener('DOMContentLoaded', () => {
+  if (location.hash) {
+    const target = document.querySelector(location.hash);
+    if (target) {
+      target.classList.add('open');
+      setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+    }
+  }
+});
+</script>
+</body>
+</html>
